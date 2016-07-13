@@ -41,9 +41,73 @@ $frame 3swipe11     3swipe12     3swipe13     3swipe14
 $frame select1      select2      select3      select4      select5      
 $frame select6      select7      select8      select9      select10     
 
+float SICKLE_LIGHTNING_COST = 1;
+float SICKLE_LIGHTNING_DIV = 10;
+float SICKLE_LIGHTNING_DIV_TOME = 5;
+float SICKLE_LIGHTNING_MAX = 7;
 
-void()sickle_decide_attack;
 
+void sickle_lightning_fire ()
+{
+	vector	source;
+	vector	org;
+	float damg;
+	float intmod, wismod;
+	float number_strikes;
+	float lightning_div;
+	float tome;
+	
+	tome = self.artifact_active&ART_TOMEOFPOWER;
+	
+	intmod = self.intelligence;
+	wismod = self.wisdom;
+	
+	damg = wismod / 3;
+	lightning_div = SICKLE_LIGHTNING_DIV;
+	
+	if (tome)
+	{
+		damg *= 1.5;
+		lightning_div = SICKLE_LIGHTNING_DIV_TOME;
+	}
+	
+	number_strikes = 0;
+	while (intmod / lightning_div >= 1)
+	{
+		number_strikes += 1;
+		intmod -= lightning_div;
+	}
+	if (number_strikes > SICKLE_LIGHTNING_MAX)
+	{
+		number_strikes = SICKLE_LIGHTNING_MAX;
+	}
+
+	makevectors (self.v_angle);
+	source = self.origin + self.proj_ofs;
+	traceline (source, source + v_forward*500, FALSE, self);
+	if (trace_fraction == 1.0)
+	{
+		traceline (source, source + v_forward*64 - (v_up * 30), FALSE, self);  // 30 down
+		if (trace_fraction == 1.0)
+		{
+			traceline (source, source + v_forward*64 + v_up * 30, FALSE, self);  // 30 up
+			if (trace_fraction == 1.0)
+				return;
+		}
+	}
+
+	org = trace_endpos + (v_forward * 4);
+
+	self.enemy = trace_ent;
+	if (trace_ent.takedamage)
+	{
+		CastLightning(number_strikes, damg);		
+	}
+	else
+	{
+		spawnshockball(trace_endpos);	
+	}
+}
 
 void sickle_fire ()
 {
@@ -230,6 +294,19 @@ void () sickle_a =
 		sickle_ready();
 };
 
+void () sickle_lightning =
+{
+	self.th_weapon=sickle_lightning;
+	self.wfs = advanceweaponframe($1swipe4,$1swipe17);
+
+	if (self.weaponframe==$1swipe4)
+		sound (self, CHAN_WEAPON, "weapons/gaunt1.wav", 1, ATTN_NORM);
+	else if (self.weaponframe == $1swipe5)
+		sickle_lightning_fire();
+	else if (self.wfs == WF_LAST_FRAME)
+		sickle_ready();
+};
+
 void sickle_select (void)
 {
 	//selection sound?
@@ -253,17 +330,24 @@ void sickle_deselect (void)
 		W_SetCurrentAmmo();
 }
 
-void sickle_decide_attack (void)
+void sickle_decide_attack (float rightclick)
 {
-	if (self.attack_cnt < 1)
-		sickle_a ();
+	if (rightclick)
+	{
+		sickle_lightning ();
+	}
 	else
 	{
-		sickle_b ();
-		self.attack_cnt = -1;
-	}
+		if (self.attack_cnt < 1)
+			sickle_a ();
+		else
+		{
+			sickle_b ();
+			self.attack_cnt = -1;
+		}
 
-	self.attack_cnt += 1;
+		self.attack_cnt += 1;		
+	}
 	self.attack_finished = time + 0.5;
 }
 

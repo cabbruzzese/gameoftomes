@@ -653,7 +653,7 @@ void W_Attack (float rightclick)
 		if (self.playerclass==CLASS_PALADIN)
 			pal_gauntlet_fire(rightclickfwd);
 		else if (self.playerclass==CLASS_NECROMANCER)
-			self.th_missile();
+			sickle_decide_attack(rightclickfwd);
 		else if (self.playerclass==CLASS_ASSASSIN)
 			Ass_Pdgr_Fire();
 		else if (self.playerclass==CLASS_CRUSADER)
