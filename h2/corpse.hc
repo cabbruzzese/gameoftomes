@@ -1,7 +1,117 @@
 /*
  * $Header: /cvsroot/uhexen2/gamecode/hc/h2/corpse.hc,v 1.2 2007-02-07 16:56:59 sezero Exp $
  */
+ 
+ void wandering_monster_respawn()
+ {
+	vector newangle,spot1,spot2,spot3;
+	float loop_cnt;
+	
+	//check if anything is in the path of spawning
+	trace_fraction = 0;
+	loop_cnt =0;
+	spot2 = self.origin;
+	while (trace_fraction < 1)
+	{
+		newangle = self.angles;
 
+		makevectors (newangle);
+		
+		spot1 = spot2;
+		spot2 = spot1 + (v_forward * 60);
+		
+		traceline (spot1, spot2 , FALSE, self);
+				
+		loop_cnt +=1;
+		dprint("Searching!!\n");
+
+		if (loop_cnt > 10)   // No endless loops
+		{
+			//if 10 checks happen and no spot is found, try again in 2 seconds
+			self.nextthink = time + 2;
+			dprint("Found nothing!!\n");
+			return;
+		}		
+	}
+	
+	//spot is clear, use spot
+	self.origin = spot1;
+ 
+	if (self.classname == "monster_imp_ice")
+	{
+		self.think = monster_imp_ice;
+	}
+	else if (self.classname == "monster_imp_fire")
+	{
+		self.think = monster_imp_fire;
+	}
+	else if (self.classname == "monster_archer")
+	{
+		self.think = monster_archer;
+	}
+	else if (self.classname == "monster_skull_wizard")
+	{
+		self.think = monster_skull_wizard;
+	}
+	else if (self.classname == "monster_scorpion_black")
+	{
+		self.think = monster_scorpion_black;
+	}
+	else if (self.classname == "monster_scorpion_yellow")
+	{
+		self.think = monster_scorpion_yellow;
+	}
+	else if (self.classname == "monster_spider_yellow_large")
+	{
+		self.think = monster_spider_yellow_large;
+	}
+	else if (self.classname == "monster_spider_yellow_small")
+	{
+		self.think = monster_spider_yellow_small;
+	}
+	else if (self.classname == "monster_spider_red_large")
+	{
+		self.think = monster_spider_red_large;
+	}
+	else if (self.classname == "monster_spider_red_small")
+	{
+		self.think = monster_spider_red_small;
+	}
+	else //not a supported respawn
+	{
+		remove(self);
+		return;
+	}
+
+	self.nextthink = time + 0.01;
+ }
+
+float WANDERING_MONSTER_TIME_MIN = 2;
+float WANDERING_MONSTER_TIME_MAX = 3;
+
+void MarkForRespawn (void)
+{
+	entity newmis;
+	float timelimit;
+		
+	if (self.classname != "player" && self.controller.classname != "player") //do not respawn players or summoned monsters
+	{
+		dprintv("Marked for respawn: %s\n",self.origin);
+
+		timelimit = random(WANDERING_MONSTER_TIME_MIN, WANDERING_MONSTER_TIME_MAX);
+		
+		newmis = spawn ();
+		newmis.origin = self.origin;
+		
+		newmis.flags2 (+) FL_SUMMONED;
+		newmis.lifetime = time + 600;
+		newmis.classname = self.classname;
+	
+		newmis.think = wandering_monster_respawn;
+		newmis.nextthink = time + timelimit;
+	}
+	remove(self);
+}
 
 void corpseblink (void)
 {
@@ -10,7 +120,9 @@ void corpseblink (void)
 	self.scale -= 0.10;
 
 	if (self.scale < 0.10)
-		remove(self);
+	{
+		MarkForRespawn();
+	}
 }
 
 void init_corpseblink (void)
@@ -89,9 +201,9 @@ vector newmaxs;
     if ((self.decap)  && (self.classname == "player"))
     {	
 		if (deathmatch||teamplay)
-			self.lifetime = time + random(20,40); // decompose after 40 seconds
+			self.lifetime = time + 2;//random(20,40); // decompose after 40 seconds
 		else 
-			self.lifetime = time + random(10,20); // decompose after 20 seconds
+			self.lifetime = time + 2;//random(10,20); // decompose after 20 seconds
 
         self.owner=self;
         self.think=Spurt;
@@ -99,7 +211,7 @@ vector newmaxs;
     }
     else 
 	{
-		self.lifetime = time + random(10,20); // disappear after 20 seconds
+		self.lifetime = time + 2;//random(10,20); // disappear after 20 seconds
 		self.think=CorpseThink;
 		thinktime self : 0;
 	}

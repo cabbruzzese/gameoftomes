@@ -2,6 +2,8 @@
  * $Header: /cvsroot/uhexen2/gamecode/hc/h2/chunk.hc,v 1.2 2007-02-07 16:56:59 sezero Exp $
  */
 void ThrowSolidHead (float dm);
+void MarkForRespawn (void);
+void () CorpseThink;
 
 void blood_splatter()
 {
@@ -630,9 +632,19 @@ void chunk_death (void)
 
 	SUB_UseTargets();
 
-	if(self.headmodel!=""&&self.classname!="head")
-		ThrowSolidHead (50);
+	if (self.thingtype==THINGTYPE_FLESH)
+	{
+		//set up respawn time
+		self.think = MarkForRespawn;
+		self.nextthink = time + 0.01;
+	}
+	else if(self.headmodel!=""&&self.classname!="head")
+	{
+		ThrowSolidHead (50);		
+	}
 	else
-		remove(self);
+	{
+		remove(self);		
+	}
 }
 
