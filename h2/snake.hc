@@ -380,6 +380,13 @@ float snake_look(void)
 		self.enemy = client;
 		return TRUE;
 	}
+	
+	if (self.controller.classname == "player")
+	{
+		self.enemy = client;
+		return TRUE;
+	}
+	
 	return FALSE;
 }
 

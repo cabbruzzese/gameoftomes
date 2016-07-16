@@ -61,6 +61,8 @@ $frame mselect16    mselect17    mselect18    mselect19    mselect20
 $frame select1      select2      select3      select4      select5      
 $frame select6      select7      
 
+float BONE_ATTACK_COST = 7;
+float RAISE_DEAD_COST = 15;
 
 /*
 ==============================================================================
@@ -190,7 +192,7 @@ string hitsound;
 	else
 	{
 		hitsound="necro/bonenwal.wav";
-		T_RadiusDamage(self,self.owner,self.dmg*2,self.owner);
+		//T_RadiusDamage(self,self.owner,self.dmg*2,self.owner);
 	}
 //FIXME: add sprite, particles, sound
 	starteffect(CE_WHITE_SMOKE, self.origin,'0 0 0', HX_FRAME_TIME);
@@ -217,7 +219,7 @@ vector shard_vel;
 	newmis.solid=SOLID_PHASE;
 	newmis.effects (+) EF_NODRAW;
 	newmis.touch=bone_shard_touch;
-	newmis.dmg=15;
+	newmis.dmg=3;
 	newmis.think=bone_removeshrapnel;
 	thinktime newmis : 3;
 
@@ -254,27 +256,18 @@ float shard_count;
 
 void bone_power_touch ()
 {
-vector randomvec;
+	vector randomvec;
 
 	sound(self,CHAN_WEAPON,"necro/bonephit.wav",1,ATTN_NORM);
 
 	if(other.takedamage)
 	{
 //		dprint("Doing damage\n");
-		T_Damage(other, self,self.owner,self.dmg*2);
-//		dprint("Doing effects\n");
-		randomvec=randomv('-20 -20 -20','20 20 20');
-		starteffect(CE_GHOST, self.origin-self.movedir*8+randomvec,'0 0 30'+randomvec, 0.1);
-		randomvec=randomv('-20 -20 -20','20 20 20');
-		starteffect(CE_GHOST, self.origin-self.movedir*8+randomvec,'0 0 30'+randomvec, 0.1);
-		randomvec=randomv('-20 -20 -20','20 20 20');
-		starteffect(CE_GHOST, self.origin-self.movedir*8+randomvec,'0 0 30'+randomvec, 0.1);
-		randomvec=randomv('-20 -20 -20','20 20 20');
-		starteffect(CE_GHOST, self.origin-self.movedir*8+randomvec,'0 0 30'+randomvec, 0.1);
+		T_Damage(other, self,self.owner,self.dmg);
 	}
 	self.flags2(+)FL2_ADJUST_MON_DAM;
 //	dprint("Doing radius damage\n");
-	T_RadiusDamage(self,self.owner,self.dmg,other);
+	//T_RadiusDamage(self,self.owner,self.dmg,other);
 
 	self.solid=SOLID_NOT;
 //	dprint("shattering\n");
@@ -341,8 +334,11 @@ void bone_smoke ()
 
 void bone_fire(float powered_up, vector ofs)
 {
-//SOUND
-vector org;
+	float intmod, wismod;
+	float tome;
+	
+	//SOUND
+	vector org;
 	makevectors(self.v_angle);
 	newmis=spawn();
 	newmis.owner=self;
@@ -353,24 +349,28 @@ vector org;
 
 	org=self.origin+self.proj_ofs+v_forward*8+v_right*(ofs_y+12)+v_up*ofs_z;
 	setorigin(newmis,org);
+	
+	tome = self.artifact_active & ART_TOMEOFPOWER;
+	intmod = self.intelligence;
+	wismod = self.wisdom;
 
 	if(powered_up)
 	{
 		self.punchangle_x=-2;
 		sound(self,CHAN_WEAPON,"necro/bonefpow.wav",1,ATTN_NORM);
-		self.attack_finished=time + 1.3;
-		newmis.dmg=100;//was 200
+		self.attack_finished=time + 1;
+		newmis.dmg=intmod * 2;
+		
+		if (tome)
+			newmis.dmg = random(intmod * 3, intmod * 4);
+		
 		newmis.frags=TRUE;
-//		newmis.takedamage=DAMAGE_YES;
-//		newmis.health=3;
-//		newmis.th_die=bone_shatter;
 		newmis.touch=bone_power_touch;
 		newmis.avelocity=randomv('777 777 777','-777 -777 -777');
 		setmodel(newmis,"models/bonelump.mdl");
 		setsize(newmis,'0 0 0','0 0 0');
-//newmis.think=power_trail;
-//thinktime newmis : 0;
-		self.greenmana-=20;
+		
+		self.greenmana-=BONE_ATTACK_COST;
 	}
 	else
 	{
@@ -383,13 +383,9 @@ vector org;
 		newmis.velocity+=v_right*ofs_y*10+v_up*ofs_z*10;
 
 		newmis.angles=vectoangles(newmis.velocity);
-//		newmis.avelocity_z=random(777,-777);
 
 		newmis.wrq_effect_id = starteffect(CE_BONESHARD, newmis.origin, newmis.velocity,
 			newmis.angles,newmis.avelocity);
-
-//newmis.think=bone_smoke;
-//thinktime newmis : 0.06;
 	}
 }
 
@@ -416,6 +412,92 @@ vector ofs;
 	bone_fire(FALSE,ofs);
 }
 
+void monster_spider_yellow_large(void);
+void CorpseThink(void);
+
+void raise_dead_think()
+{
+	monster_spider_yellow_large();
+	
+	self.experience_value = 0; //no XP for summoned monsters
+}
+
+void raise_dead(entity body, float intmod)
+{
+	vector newpos;
+	entity newmis;
+	
+	newpos = body.origin;
+	
+	//gib body
+	body.think = chunk_death;
+	body.nextthink = 0.1;
+	
+	//ghost effect
+	starteffect(CE_GHOST, body.origin,'0 0 30', 0.1);
+	
+	//spawn monster
+	newmis = spawn ();
+	newmis.origin = newpos;
+	
+	newmis.flags2 (+) FL_SUMMONED;
+	newmis.lifetime = time + (intmod * 2);
+	newmis.think = raise_dead_think;
+	newmis.nextthink = time + 0.05;
+	newmis.controller = self;
+}
+
+void bone_raise_dead()
+{
+	vector	source;
+	vector	org;
+	float damg;
+	float intmod, wismod;
+	float tome;
+	
+	tome = self.artifact_active&ART_TOMEOFPOWER;
+	
+	intmod = self.intelligence;
+	wismod = self.wisdom;
+	
+	makevectors (self.v_angle);
+	source = self.origin + self.proj_ofs;
+	traceline (source, source + v_forward*650, FALSE, self);
+	if (trace_fraction == 1.0)
+	{
+		traceline (source, source + v_forward*64 - (v_up * 30), FALSE, self);  // 30 down
+		if (trace_fraction == 1.0)
+		{
+			traceline (source, source + v_forward*64 + v_up * 30, FALSE, self);  // 30 up
+			if (trace_fraction == 1.0)
+				return;
+		}
+	}
+
+	org = trace_endpos + (v_forward * 4);
+
+	self.enemy = trace_ent;
+	if (trace_ent.takedamage && trace_ent.think == CorpseThink)
+	{
+		raise_dead(trace_ent, intmod);
+		
+		self.greenmana -= RAISE_DEAD_COST;
+	}
+	else
+	{
+		// hit wall
+		WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
+		WriteByte (MSG_BROADCAST, TE_GUNSHOT);
+		WriteCoord (MSG_BROADCAST, org_x);
+		WriteCoord (MSG_BROADCAST, org_y);
+		WriteCoord (MSG_BROADCAST, org_z);
+
+		CreateWhiteFlash(org);
+	}
+	
+	self.attack_finished=time + 1;
+}
+
 
 /*======================
 ACTION
@@ -437,20 +519,23 @@ void() Nec_Bon_Attack;
 void boneshard_fire (void)
 {
 	self.wfs = advanceweaponframe($fire1,$fire12);
-	if(self.button0&&self.weaponframe>$fire3 &&!self.artifact_active&ART_TOMEOFPOWER)
-		self.weaponframe=$fire3;
+	
 	self.th_weapon=boneshard_fire;
 	self.last_attack=time;
-	if(self.wfs==WF_CYCLE_WRAPPED||self.greenmana<1||(self.greenmana<10&&self.artifact_active&ART_TOMEOFPOWER))
-		boneshard_ready();
-	else if(self.weaponframe==$fire3)
-		if(self.artifact_active&ART_TOMEOFPOWER)
-			bone_fire(TRUE,'0 0 0');
-		else
-			bone_normal();
+	if(self.weaponframe==$fire3)
+	{
+		if(self.button1 && self.greenmana >= RAISE_DEAD_COST)
+		{
+			bone_raise_dead();
+		}
+		else if (self.greenmana >= BONE_ATTACK_COST)
+		{
+			bone_fire(TRUE,'0 0 0');			
+		}
+	}
 
-	if(random()<0.8&&!self.artifact_active&ART_TOMEOFPOWER&&self.weaponframe<=$fire6)
-		bone_fire_once();
+	if (self.wfs == WF_LAST_FRAME)
+		boneshard_ready();
 }
 
 void() Nec_Bon_Attack =

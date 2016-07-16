@@ -62,7 +62,7 @@ void sickle_lightning_fire ()
 	intmod = self.intelligence;
 	wismod = self.wisdom;
 	
-	damg = wismod / 3;
+	damg = wismod * 0.4;
 	lightning_div = SICKLE_LIGHTNING_DIV;
 	
 	if (tome)
@@ -84,7 +84,7 @@ void sickle_lightning_fire ()
 
 	makevectors (self.v_angle);
 	source = self.origin + self.proj_ofs;
-	traceline (source, source + v_forward*500, FALSE, self);
+	traceline (source, source + v_forward*750, FALSE, self);
 	if (trace_fraction == 1.0)
 	{
 		traceline (source, source + v_forward*64 - (v_up * 30), FALSE, self);  // 30 down
@@ -105,7 +105,14 @@ void sickle_lightning_fire ()
 	}
 	else
 	{
-		spawnshockball(trace_endpos);	
+		// hit wall
+		WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
+		WriteByte (MSG_BROADCAST, TE_GUNSHOT);
+		WriteCoord (MSG_BROADCAST, org_x);
+		WriteCoord (MSG_BROADCAST, org_y);
+		WriteCoord (MSG_BROADCAST, org_z);
+
+		CreateWhiteFlash(org);
 	}
 }
 
@@ -297,11 +304,11 @@ void () sickle_a =
 void () sickle_lightning =
 {
 	self.th_weapon=sickle_lightning;
-	self.wfs = advanceweaponframe($1swipe4,$1swipe17);
+	self.wfs = advanceweaponframe($2swipe1,$2swipe14);
 
-	if (self.weaponframe==$1swipe4)
+	if (self.weaponframe==$2swipe1)
 		sound (self, CHAN_WEAPON, "weapons/gaunt1.wav", 1, ATTN_NORM);
-	else if (self.weaponframe == $1swipe5)
+	else if (self.weaponframe == $2swipe3)
 		sickle_lightning_fire();
 	else if (self.wfs == WF_LAST_FRAME)
 		sickle_ready();

@@ -330,7 +330,8 @@ float		r;
 // spawnflags & 3 is a big hack, because zombie crucified used the first
 // spawn flag prior to the ambush flag, and I forgot about it, so the second
 // spawn flag works as well
-	if(!deathmatch&&(self.classname=="monster_imp_lord"||self.classname=="cube_of_force"))
+	if((!deathmatch&&(self.classname=="monster_imp_lord"||self.classname=="cube_of_force")) ||
+		(self.controller.classname == "player"))//summoned by player, find monster targets
 		return FindMonsterTarget();
 
 	if (sight_entity_time >= time)

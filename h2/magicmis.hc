@@ -117,15 +117,21 @@ void StarTwinkle (void)
 	thinktime self : 0.05;
 }
 
-void FireMagicMissile (float offset)
+void FireMagicMissile (float offset, float seeking)
 {
-entity star1,star2;
-vector spread;
+	entity star1,star2;
+	vector spread;
+	float tome;
+	float wismod, intmod;
 
 	if(self.classname=="monster_eidolon")
 		v_forward=self.v_angle;
 	else
 		makevectors(self.v_angle);
+	
+	tome = self.artifact_active&ART_TOMEOFPOWER;
+	wismod = self.wisdom;
+	intmod = self.intelligence;
 
 	self.effects(+)EF_MUZZLEFLASH;
 	newmis=spawn();
@@ -136,7 +142,6 @@ vector spread;
 	newmis.solid=SOLID_BBOX;
 
 	newmis.touch=MagicMissileTouch;
-	newmis.dmg=random(20,25);
 
 	newmis.speed=1000;
 	spread=normalize(v_right)*(offset*25);
@@ -150,19 +155,27 @@ vector spread;
 
 	if(self.classname=="monster_eidolon")
 	{
+		newmis.dmg = random(20,25);
 		newmis.scale=0.75;
 		setorigin(newmis,self.origin+self.proj_ofs+v_forward*48+v_right*20);
 		sound(self,CHAN_AUTO,"eidolon/spell.wav",1,ATTN_NORM);
 	}
 	else
 	{
+		newmis.dmg = intmod;
+		if (tome)
+		{
+			newmis.dmg = random(intmod, intmod * 1.5);
+		}
 		newmis.scale=0.5;
 		setorigin(newmis,self.origin+self.proj_ofs+v_forward*8+v_right*7+'0 0 5');
 		sound(newmis,CHAN_AUTO,"necro/mmfire.wav",1,ATTN_NORM);
 	}
 
-	if(self.artifact_active&ART_TOMEOFPOWER)
-	{
+	if(seeking)
+	{		
+		newmis.turn_time=2;
+
 		if(self.classname=="monster_eidolon")
 		{
 			newmis.enemy=self.enemy;
@@ -170,17 +183,18 @@ vector spread;
 			newmis.turn_time=3;
 			newmis.dmg=random(30,40);
 		}
+		else if (tome)
+		{
+			newmis.dmg=random(wismod, wismod * 3);
+		}
 		else
 		{
-			newmis.turn_time=2;
-			newmis.dmg=random(45,55);
+			newmis.dmg=random(wismod, wismod * 2);			
 		}
 		newmis.effects=EF_DIMLIGHT;
 		newmis.frags=TRUE;
-//		newmis.dmg=random(30,40);
 		newmis.veer=100;
 		newmis.homerate=0.1;
-//		newmis.turn_time=3;
 		newmis.lifetime=time+5;
 		newmis.th_die=chain_remove;
 		newmis.think=HomeThink;
@@ -266,25 +280,52 @@ void FireFlash ()
 
 void  mmis_power()
 {
+	float tome;
+	float cost;
+	
 	if(self.attack_finished>time)
 		return;
+	
+	tome = self.artifact_active&ART_TOMEOFPOWER;
 
 	FireFlash();
-	FireMagicMissile(-3);
-	FireMagicMissile(0);
-	FireMagicMissile(3);
-	self.bluemana-=10;
-	self.attack_finished=time+0.7;
+	FireMagicMissile(0, TRUE);
+	
+	cost = 4;
+	
+	if (tome)
+	{
+		FireMagicMissile(-3, TRUE);
+		FireMagicMissile(3, TRUE);
+		cost = 10;
+	}
+	
+	self.bluemana-=cost;
+	self.attack_finished=time+0.8;
 }
 
 void  mmis_normal()
 {
+	float cost;
+	float tome;
+	
 	if(self.attack_finished>time)
 		return;
 
+	tome = self.artifact_active&ART_TOMEOFPOWER;
+	
+	cost = 2;
 	FireFlash();
-	FireMagicMissile(0);
-	self.bluemana-=2;
+	FireMagicMissile(0, FALSE);
+	
+	if (tome)
+	{
+		FireMagicMissile(-3, FALSE);
+		FireMagicMissile(3, FALSE);
+		cost = 8;
+	}
+	
+	self.bluemana-=cost;
 	self.attack_finished=time+0.2;
 }
 
@@ -315,7 +356,7 @@ void magicmis_fire (void)
 	if(self.wfs==WF_CYCLE_WRAPPED||self.bluemana<2||(self.artifact_active&ART_TOMEOFPOWER&&self.bluemana<10))
 		magicmis_ready();
 	else if(self.weaponframe==$mfire5)// &&self.attack_finished<=time)
-		if(self.artifact_active&ART_TOMEOFPOWER)
+		if(self.button1)
 			mmis_power();
 		else
 			mmis_normal();

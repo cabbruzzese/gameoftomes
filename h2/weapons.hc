@@ -522,17 +522,17 @@ float W_CheckNoAmmo (float check_weapon)
 		{
 			if(self.artifact_active&ART_TOMEOFPOWER)
 			{
-				if(self.greenmana >= 20)
+				if(self.greenmana >= 7)
 					return TRUE;
 			}
-			else if(self.greenmana >= 1)
+			else if(self.greenmana >= 7)
 					return TRUE;
 		}
 		else if (check_weapon==IT_WEAPON2)
 		{
 			if(self.artifact_active&ART_TOMEOFPOWER)
 			{
-				if(self.bluemana >= 10)
+				if(self.bluemana >= 8)
 					return TRUE;
 			}
 			else if(self.bluemana >= 2)
@@ -671,7 +671,7 @@ void W_Attack (float rightclick)
 				Cru_Ice_Fire();
 		}
 		else if(self.playerclass==CLASS_NECROMANCER)
-			self.th_missile();
+			Nec_Mis_Attack();
 	}
 	else if (self.weapon == IT_WEAPON3)
 	{
@@ -682,7 +682,7 @@ void W_Attack (float rightclick)
 		else if (self.playerclass==CLASS_CRUSADER)
 			Cru_Met_Attack();
 		else if(self.playerclass==CLASS_NECROMANCER)
-			self.th_missile();
+			Nec_Bon_Attack();
 	}
 	else if (self.weapon == IT_WEAPON4)
 	{

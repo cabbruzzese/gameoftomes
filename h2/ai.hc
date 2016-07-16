@@ -132,12 +132,12 @@ vector	spot1, spot2;
 
 	if (trace_fraction == 1)
 	{
-		if(forent.flags&FL_MONSTER)
+		/*if(forent.flags&FL_MONSTER)
 		{
 			if(visibility_good(targ,0.15 - skill/20))
 				return TRUE;
 		}
-		else
+		else*/
 			return TRUE;
 	}
 
@@ -296,7 +296,7 @@ void SightSound (void)
 
 void() FoundTarget =
 {
-	if (self.enemy.classname == "player")
+	if (self.enemy.classname == "player" || self.controller.classname == "player")
 	{	// let other monsters see this monster for a while
 		sight_entity = self;
 		sight_entity_time = time + 1;
@@ -337,7 +337,8 @@ float		r;
 // spawnflags & 3 is a big hack, because zombie crucified used the first
 // spawn flag prior to the ambush flag, and I forgot about it, so the second
 // spawn flag works as well
-	if(!deathmatch&&(self.classname=="monster_imp_lord"||self.classname=="cube_of_force"))
+	if((!deathmatch&&(self.classname=="monster_imp_lord"||self.classname=="cube_of_force")) ||
+		(self.controller.classname == "player"))//summoned by player, find monster targets
 		return FindMonsterTarget();
 
 	if (sight_entity_time >= time&&sight_entity!=world)
