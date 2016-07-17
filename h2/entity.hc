@@ -719,3 +719,4 @@ entity	sight_entity;	//So monsters wake up other monsters
 .entity path_last;
 .float dflags;
 
+.float preventrespawn;

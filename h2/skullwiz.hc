@@ -207,6 +207,7 @@ void spider_spawn (float spawn_side)
 	newmis.think = skullwiz_summon;
 	newmis.origin = self.origin;
 	newmis.controller = self;
+	newmis.preventrespawn = TRUE;
 
 	newmis.angles = self.angles;
 }

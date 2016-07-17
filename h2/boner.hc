@@ -445,6 +445,7 @@ void raise_dead(entity body, float intmod)
 	newmis.think = raise_dead_think;
 	newmis.nextthink = time + 0.05;
 	newmis.controller = self;
+	newmis.preventrespawn = TRUE;
 }
 
 void bone_raise_dead()

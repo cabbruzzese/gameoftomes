@@ -137,7 +137,7 @@ void MarkForRespawn (void)
 	entity newmis;
 	float timelimit;
 	
-	if (self.classname != "player" && self.controller.classname != "player" && self.controller.classname != "monster_skull_wizard") //do not respawn players or summoned monsters
+	if (self.classname != "player" && !self.preventrespawn) //do not respawn players or summoned monsters
 	{
 		dprint ("Classname: ");
 		dprint (self.classname);
