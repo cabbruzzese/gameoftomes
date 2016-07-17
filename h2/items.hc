@@ -1263,7 +1263,7 @@ void MonsterDropStuff(void)
 	// Grunts drop only instant items
 	if (self.monsterclass == CLASS_GRUNT)
 	{
-		if (random() < .15) // %15 chance he'll drop something	
+		if (random() < .33) // %33 chance he'll drop something	
 		{
 			chance = random();
 			if (chance < .25)
@@ -1285,43 +1285,50 @@ void MonsterDropStuff(void)
 	// Henchmen drop instant items or lesser artifacts
 	else if (self.monsterclass == CLASS_HENCHMAN)
 	{
-		if (random() < .15) // %15 chance he'll drop something	
+		if (random() < .33) // %33 chance he'll drop something	
 		{
 			chance = random();
 
-			if (chance < .08)
+			if (chance < .06)
 				self.greenmana = 10;
-			else if (chance < .16)
+			else if (chance < .12)
 				self.bluemana = 10;
 			else if (chance < .24)
 			{
 				self.greenmana = 10;
 				self.bluemana = 10;
 			}
-			else if (chance < .32)
+			else if (chance < .40)
 			{
 				self.spawn_health = 1;
 			}
-			else if (chance < .40)
-				self.cnt_torch = 1;
-			else if (chance < .48)
+			else if (chance < .50)
 				self.cnt_h_boost = 1;
-			else if (chance < .56)
+			else if (chance < .55)
+				self.cnt_torch = 1;
+			else if (chance < .65)
 				self.cnt_mana_boost = 1;
-			else if (chance < .64)
+			else if (chance < .60)
 				self.cnt_teleport = 1;
-			else if (chance < .72)
+			else if (chance < .65)
 				self.cnt_tome = 1;
-			else if (chance < .80)
+			else if (chance < .70)
 				self.cnt_haste = 1;
-			else if (chance < .90)
+			else if (chance < .75)
 				self.cnt_blast = 1;
+			else if (chance < .80)
+				self.armor_amulet = 20;
+			else if (chance < .95)
+				self.armor_bracer = 20;
+			else
+				self.armor_helmet = 20;
+
 		}		
 	}
 	// Leaders drop armor or artifacts
 	else if (self.monsterclass == CLASS_LEADER)
 	{		
-		if (random() < .15) // %15 chance he'll drop something	
+		if (random() < .5) // %50 chance he'll drop something	
 		{
 			chance = random();
 		

@@ -1,7 +1,15 @@
 /*
  * $Header: /cvsroot/uhexen2/gamecode/hc/h2/corpse.hc,v 1.2 2007-02-07 16:56:59 sezero Exp $
  */
- 
+void monster_golem_stone (void);
+void monster_golem_iron (void);
+void monster_golem_bronze (void);
+void monster_mummy (void);
+void monster_mummy_lord (void);
+void monster_werejaguar (void);
+void monster_mezzoman (void);
+void monster_werepanther (void);
+		
  void wandering_monster_respawn()
  {
 	vector newangle,spot1,spot2,spot3;
@@ -77,8 +85,43 @@
 	{
 		self.think = monster_spider_red_small;
 	}
+	else if (self.classname == "monster_golem_stone")
+	{
+		self.think = monster_golem_stone;
+	}
+	else if (self.classname == "monster_golem_iron")
+	{
+		self.think = monster_golem_iron;
+	}
+	else if (self.classname == "monster_golem_bronze")
+	{
+		self.think = monster_golem_bronze;
+	}
+	else if (self.classname == "monster_mummy")
+	{
+		self.think = monster_mummy;
+	}
+	else if (self.classname == "monster_mummy_lord")
+	{
+		self.think = monster_mummy_lord;
+	}
+	else if (self.classname == "monster_werejaguar")
+	{
+		self.think = monster_werejaguar;
+	}
+	else if (self.classname == "monster_mezzoman")
+	{
+		self.think = monster_mezzoman;
+	}
+	else if (self.classname == "monster_werepanther")
+	{
+		self.think = monster_werepanther;
+	}
 	else //not a supported respawn
 	{
+		//Don't respawn bosses
+		//Other monsters not supported: 
+		//		monster_golem_crystal, monster_fallen_angel, monster_fallen_angel_lord
 		remove(self);
 		return;
 	}
@@ -86,16 +129,23 @@
 	self.nextthink = time + 0.01;
  }
 
-float WANDERING_MONSTER_TIME_MIN = 2;
-float WANDERING_MONSTER_TIME_MAX = 3;
+float WANDERING_MONSTER_TIME_MIN = 10;
+float WANDERING_MONSTER_TIME_MAX = 20;
 
 void MarkForRespawn (void)
 {
 	entity newmis;
 	float timelimit;
-		
-	if (self.classname != "player" && self.controller.classname != "player") //do not respawn players or summoned monsters
+	
+	if (self.classname != "player" && self.controller.classname != "player" && self.controller.classname != "monster_skull_wizard") //do not respawn players or summoned monsters
 	{
+		dprint ("Classname: ");
+		dprint (self.classname);
+		dprint (" Controller: ");
+		dprint (self.controller.classname);
+		dprint (" Owner: ");
+		dprint (self.owner.classname);
+		dprint ("\n");
 		dprintv("Marked for respawn: %s\n",self.origin);
 
 		timelimit = random(WANDERING_MONSTER_TIME_MIN, WANDERING_MONSTER_TIME_MAX);
@@ -193,7 +243,8 @@ vector newmaxs;
 	if(self.flags&FL_ONGROUND)
 		self.velocity='0 0 0';
     self.flags(-)FL_MONSTER;
-    self.controller = self;
+	if (self.controller.classname != "player" && self.controller.classname != "monster_skull_wizard")
+		self.controller = self;
 	self.onfire = FALSE;
 
 	pitch_roll_for_slope('0 0 0');

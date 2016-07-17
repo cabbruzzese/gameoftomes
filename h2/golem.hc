@@ -134,17 +134,20 @@ void monster_golem_stone(void)
 		return;
 	}
 
-	precache_model3("models/golem_s.mdl");
-	
-	precache_model3("models/goarm.mdl");
-	precache_model3("models/golegs.mdl");
-	precache_model3("models/g-head.mdl");
+	if(!self.flags2&FL_SUMMONED)
+	{
+		precache_model3("models/golem_s.mdl");
+		
+		precache_model3("models/goarm.mdl");
+		precache_model3("models/golegs.mdl");
+		precache_model3("models/g-head.mdl");
 
-	precache_sound3("golem/stnfall.wav");
-	precache_sound3("golem/stnpain.wav");
-	precache_sound3("golem/slide.wav");
-	precache_sound3("imp/swoophit.wav");
-	precache_sound3("golem/dthgroan.wav");
+		precache_sound3("golem/stnfall.wav");
+		precache_sound3("golem/stnpain.wav");
+		precache_sound3("golem/slide.wav");
+		precache_sound3("imp/swoophit.wav");
+		precache_sound3("golem/dthgroan.wav");		
+	}
 
 	self.thingtype = THINGTYPE_GREYSTONE;
 	setmodel(self, "models/golem_s.mdl");
@@ -182,18 +185,21 @@ void monster_golem_iron(void)
 		return;
 	}
 
+	if(!self.flags2&FL_SUMMONED)
+	{
+		precache_model2("models/golem_i.mdl");
 
-	precache_model2("models/golem_i.mdl");
+		precache_model2("models/goarm.mdl");
+		precache_model2("models/golegs.mdl");
+		precache_model2("models/g-head.mdl");
 
-	precache_model2("models/goarm.mdl");
-	precache_model2("models/golegs.mdl");
-	precache_model2("models/g-head.mdl");
-
-	precache_model2("models/golemmis.mdl");
-	precache_sound2("golem/mtlfall.wav");
-	precache_sound2("golem/mtlpain.wav");
-	precache_sound2("golem/gbfire.wav");
-	precache_sound2("golem/dthgroan.wav");
+		precache_model2("models/golemmis.mdl");
+		precache_sound2("golem/mtlfall.wav");
+		precache_sound2("golem/mtlpain.wav");
+		precache_sound2("golem/gbfire.wav");
+		precache_sound2("golem/dthgroan.wav");
+	}
+	
 	self.thingtype = THINGTYPE_METAL;
 	setmodel(self, "models/golem_i.mdl");
 	setsize(self, '-32 -32 0', '32 32 80');
@@ -229,18 +235,23 @@ void monster_golem_bronze(void)
 	}
 
 	self.cnt = 0;
-	precache_model2("models/golem_b.mdl");
+	
+	if(!self.flags2&FL_SUMMONED)
+	{
+		precache_model2("models/golem_b.mdl");
 
-	precache_model2("models/goarm.mdl");
-	precache_model2("models/golegs.mdl");
-	precache_model2("models/g-head.mdl");
+		precache_model2("models/goarm.mdl");
+		precache_model2("models/golegs.mdl");
+		precache_model2("models/g-head.mdl");
 
-	precache_sound2("golem/mtlfall.wav");
-	precache_sound2("golem/mtlpain.wav");
-	precache_sound2("golem/stomp.wav");
-	precache_sound2("golem/gbcharge.wav");
-	precache_sound2("golem/gbfire.wav");
-	precache_sound2("golem/dthgroan.wav");
+		precache_sound2("golem/mtlfall.wav");
+		precache_sound2("golem/mtlpain.wav");
+		precache_sound2("golem/stomp.wav");
+		precache_sound2("golem/gbcharge.wav");
+		precache_sound2("golem/gbfire.wav");
+		precache_sound2("golem/dthgroan.wav");
+	}
+	
 	self.thingtype = THINGTYPE_METAL;
 	setmodel(self, "models/golem_b.mdl");
 	setsize(self, '-60 -60 0', '60 60 190');
@@ -276,10 +287,14 @@ void monster_golem_crystal(void)
 		return;
 	}
 
-	precache_model3("models/golem_s.mdl");
-	precache_sound3("golem/stnpain.wav");
-	precache_sound3("golem/slide.wav");
-	precache_sound3("golem/dthgroan.wav");
+	if(!self.flags2&FL_SUMMONED)
+	{
+		precache_model3("models/golem_s.mdl");
+		precache_sound3("golem/stnpain.wav");
+		precache_sound3("golem/slide.wav");
+		precache_sound3("golem/dthgroan.wav");
+	}
+	
 	self.thingtype = THINGTYPE_ICE;
 	setmodel(self, "models/golem_s.mdl");
 	setsize(self, '-24 -24 0', '24 24 80');
@@ -322,9 +337,12 @@ void GolemInit(void)
 	self.th_walk = GolemWalk;
 	self.th_run = GolemRun;
 	self.th_die = GolemDie;
-	precache_sound3("golem/awaken.wav");
-	precache_sound3("golem/step.wav");
-	precache_sound3("golem/swing.wav");
+	if(!self.flags2&FL_SUMMONED)
+	{
+		precache_sound3("golem/awaken.wav");
+		precache_sound3("golem/step.wav");
+		precache_sound3("golem/swing.wav");
+	}
 }
 
 //==========================================================================
