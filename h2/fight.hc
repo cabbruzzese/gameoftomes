@@ -55,7 +55,7 @@ float CheckAttack()
 
 	if (trace_ent != targ)
 		if(trace_ent.health>25||!trace_ent.takedamage||
-			(trace_ent.flags&FL_MONSTER&&trace_ent.classname!="player_sheep"&&self.controller.classname!="player"))//if aimed at monster and the monster is not a sheep and the attacker is not summoned
+			(trace_ent.flags&FL_MONSTER&&trace_ent.classname!="player_sheep"))//if aimed at monster and the monster is not a sheep
 			return FALSE;//Don't have a clear shot, and don't want to shoot obstruction
 			
 //FIXME: check for translucent water?

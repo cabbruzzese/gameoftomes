@@ -132,12 +132,12 @@ vector	spot1, spot2;
 
 	if (trace_fraction == 1)
 	{
-		/*if(forent.flags&FL_MONSTER)
+		if(forent.flags&FL_MONSTER)
 		{
 			if(visibility_good(targ,0.15 - skill/20))
 				return TRUE;
 		}
-		else*/
+		else
 			return TRUE;
 	}
 
@@ -296,7 +296,7 @@ void SightSound (void)
 
 void() FoundTarget =
 {
-	if (self.enemy.classname == "player" || self.controller.classname == "player")
+	if (self.enemy.classname == "player")
 	{	// let other monsters see this monster for a while
 		sight_entity = self;
 		sight_entity_time = time + 1;

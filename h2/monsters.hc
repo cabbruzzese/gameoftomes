@@ -31,7 +31,7 @@ void() monster_use =
 		return;
 	if (activator.flags & FL_NOTARGET)
 		return;
-	if (activator.classname != "player" && self.controller.classname != "player")
+	if (activator.classname != "player")
 		return;
 	
 	if(self.classname=="monster_mezzoman"&&!visible(activator)&&!self.monster_awake)
