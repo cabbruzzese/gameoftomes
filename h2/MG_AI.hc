@@ -151,7 +151,7 @@ float okay;
 						}
 		found=found.chain;
 	}
-	if(self.classname=="monster_imp_lord" || self.controller.classname == "player") // if imp, or summoned by player
+	if(self.playercontrolled) // if imp, or summoned by player
 		self.enemy=self.controller;
 	return FALSE;
 }
@@ -506,7 +506,7 @@ entity oldtarget;
 		return;
 	}
 
-	if(self.classname=="monster_imp_lord" || self.controller.classname == "player")
+	if(self.playercontrolled)
 		return;
 
 	if(self.oldenemy.classname=="player"&&(self.oldenemy.flags2&FL_ALIVE)&&visible(self.oldenemy))

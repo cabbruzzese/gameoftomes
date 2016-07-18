@@ -243,7 +243,7 @@ vector newmaxs;
 	if(self.flags&FL_ONGROUND)
 		self.velocity='0 0 0';
     self.flags(-)FL_MONSTER;
-	if (self.controller.classname != "player" && self.controller.classname != "monster_skull_wizard")
+	if (!self.preventrespawn)
 		self.controller = self;
 	self.onfire = FALSE;
 

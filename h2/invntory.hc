@@ -56,6 +56,7 @@ float move_cnt;
 		newmis.controller=self.owner;
 		newmis.team=self.owner.team;
 		newmis.preventrespawn = TRUE;// mark so summoned monster cannot respawn
+		newmis.playercontrolled = TRUE;
 		newmis.classname="monster_imp_lord";
 		newmis.lifetime=time+30;
 		if(self.owner.enemy!=world&&self.owner.enemy.flags2&FL_ALIVE&&visible2ent(self.owner.enemy,self))

@@ -446,7 +446,16 @@ void raise_dead(entity body, float intmod)
 	newmis.nextthink = time + 0.05;
 	newmis.controller = self;
 	newmis.preventrespawn = TRUE;// mark so summoned monster cannot respawn
-	newmis.enemy=newmis.goalentity=self; // follow player
+	newmis.playercontrolled = TRUE;
+	
+	if(self.enemy!=world&&self.enemy.flags2&FL_ALIVE&&visible2ent(self.enemy,self))
+	{
+		newmis.enemy=newmis.goalentity=self.enemy;
+	}
+	else
+	{
+		newmis.enemy=newmis.goalentity=self; // follow player		
+	}
 	newmis.monster_awake=TRUE; //start awake
 	newmis.team=self.team;
 }
