@@ -1256,6 +1256,9 @@ void MonsterDropStuff(void)
 
 	if(!self.flags&FL_MONSTER)
 		return;
+	
+	if (self.preventrespawn)
+		return;
 
 	if (self.monsterclass < CLASS_GRUNT)
 		return;

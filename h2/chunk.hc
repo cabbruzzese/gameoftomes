@@ -641,7 +641,7 @@ void chunk_death (void)
 	}
 	else if(self.headmodel!=""&&self.classname!="head")
 	{
-		ThrowSolidHead (50);		
+		ThrowSolidHead (50);
 	}
 	else
 	{
