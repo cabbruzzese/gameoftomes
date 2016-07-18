@@ -129,8 +129,8 @@ void monster_werepanther (void);
 	self.nextthink = time + 0.01;
  }
 
-float WANDERING_MONSTER_TIME_MIN = 10;
-float WANDERING_MONSTER_TIME_MAX = 20;
+float WANDERING_MONSTER_TIME_MIN = 120; //2 minutes
+float WANDERING_MONSTER_TIME_MAX = 360; //7 minutes
 
 void MarkForRespawn (void)
 {
@@ -252,9 +252,9 @@ vector newmaxs;
     if ((self.decap)  && (self.classname == "player"))
     {	
 		if (deathmatch||teamplay)
-			self.lifetime = time + 2;//random(20,40); // decompose after 40 seconds
+			self.lifetime = time + random(20,40); // decompose after 40 seconds
 		else 
-			self.lifetime = time + 2;//random(10,20); // decompose after 20 seconds
+			self.lifetime = time + random(10,20); // decompose after 20 seconds
 
         self.owner=self;
         self.think=Spurt;
@@ -262,7 +262,7 @@ vector newmaxs;
     }
     else 
 	{
-		self.lifetime = time + 2;//random(10,20); // disappear after 20 seconds
+		self.lifetime = time + random(10,20); // disappear after 20 seconds
 		self.think=CorpseThink;
 		thinktime self : 0;
 	}
