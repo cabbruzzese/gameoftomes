@@ -142,6 +142,7 @@ void()eidolon_grow;
 void(entity attacker,float total_damage)eidolon_check_fake;
 void()eidolon_power;
 void()eidolon_face_orb;
+void eidolon_guarding ();
 
 void orb_die()
 {
@@ -1117,7 +1118,7 @@ void eidolon_spell () [++ $spell1 .. $spell20]
 		if(self.veer)
 			EidoPoly();
 		else
-			FireMagicMissile(0);
+			FireMagicMissile(0, TRUE);
 	}
 	if(self.frame==$spell20)
 	{

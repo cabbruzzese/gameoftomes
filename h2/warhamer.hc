@@ -50,7 +50,7 @@ $frame Throw6       Throw7       Throw8       Throw9       Throw10
 //
 $frame idle
 
-float HAMMER_THROW_COST = 4;
+float HAMMER_THROW_COST = 3;
 
 void(vector org) spawn_tfog;
 void(float max_strikes, float damg)CastLightning;
@@ -172,7 +172,11 @@ float distance;
 
 void HammerTouch ()
 {
-float inertia;
+	float inertia;
+	float tome;
+	
+	tome = self.owner.artifact_active&ART_TOMEOFPOWER;
+
 	if (other == self.controller)
 		if (self.aflag||self.bloodloss<time)
 			ThrowHammerReturn();
@@ -183,21 +187,29 @@ float inertia;
       if(self.velocity != VEC_ORIGIN && other != self.controller)
         if (self.aflag < 1)  
         {
-//          spawn_touchblood(40);
-//          SpawnChunk(self.origin, self.velocity);
-	        other.punchangle_x = -20;
-		    self.enemy = other;  
-			CastLightning(3, self.dmg);
-			if(other.health&&other.solid!=SOLID_BSP&&other.movetype!=MOVETYPE_PUSH)
+			if (tome) //tome throws monster back and casts lightning
 			{
-				if (other.mass<=10)
-					inertia=1;
-				else 
-					inertia = other.mass/10;
-				other.velocity_x = other.velocity_x + self.velocity_x / inertia;
-		        other.velocity_y = other.velocity_y + self.velocity_y / inertia;
-//				other.velocity_z = other.velocity_z + 100/inertia;
-				other.flags(-)FL_ONGROUND;
+	//          spawn_touchblood(40);
+	//          SpawnChunk(self.origin, self.velocity);
+				other.punchangle_x = -20;
+				self.enemy = other;  
+				CastLightning(3, self.dmg / 2);
+				if(other.health&&other.solid!=SOLID_BSP&&other.movetype!=MOVETYPE_PUSH)
+				{
+					if (other.mass<=10)
+						inertia=1;
+					else 
+						inertia = other.mass/10;
+					other.velocity_x = other.velocity_x + self.velocity_x / inertia;
+					other.velocity_y = other.velocity_y + self.velocity_y / inertia;
+	//				other.velocity_z = other.velocity_z + 100/inertia;
+					other.flags(-)FL_ONGROUND;
+				}				
+			}
+			else
+			{
+				//just make a puff if not tome
+				SpawnPuff (self.origin, '0 0 0', 20,other);
 			}
 			T_Damage(other, self, self.controller, self.dmg);
         }
@@ -216,44 +228,45 @@ float inertia;
 
 void ThrowHammer (float wismod, float tome)
 {
-local entity missile;
-  sound(self, CHAN_WEAPON, "weapons/vorpswng.wav", 1, ATTN_NORM);
-  missile = spawn();
-  missile.owner = self;
-  missile.controller = self;
-  missile.classname = "mjolnir";
-  missile.movetype = MOVETYPE_FLYMISSILE;
-  missile.solid = SOLID_BBOX;
-  makevectors(self.v_angle);
-  missile.velocity = normalize(v_forward);
-  missile.angles = vectoangles(missile.velocity);
-  missile.speed = 800;
-  if (self.waterlevel > 2)
-        missile.velocity = missile.velocity * missile.speed*0.5;
-  else
-        missile.velocity = missile.velocity * missile.speed;
-  missile.touch = HammerTouch;
-  thinktime missile : 0;
+	local entity missile;
+	sound(self, CHAN_WEAPON, "weapons/vorpswng.wav", 1, ATTN_NORM);
+	missile = spawn();
+	missile.owner = self;
+	missile.controller = self;
+	missile.classname = "mjolnir";
+	missile.movetype = MOVETYPE_FLYMISSILE;
+	missile.solid = SOLID_BBOX;
+	makevectors(self.v_angle);
+	missile.velocity = normalize(v_forward);
+	missile.angles = vectoangles(missile.velocity);
+	missile.speed = 800;
+	if (self.waterlevel > 2)
+		missile.velocity = missile.velocity * missile.speed*0.5;
+	else
+		missile.velocity = missile.velocity * missile.speed;
+	missile.touch = HammerTouch;
+	thinktime missile : 0;
 	missile.frags=TRUE;
-  missile.bloodloss = time + 0.3;
-  missile.lifetime = time + 3;
-  sound(missile, CHAN_VOICE, "paladin/axblade.wav", 1, ATTN_NORM);
-  missile.think = ThrowHammerThink;
-  setmodel(missile, "models/hamthrow.mdl");
-  setsize(missile,'-1 -2 -4','1 2 4');
-  setorigin(missile, self.origin+self.proj_ofs + v_forward * FL_SWIM);
-  missile.avelocity = '-500 0 0';
-  missile.aflag = 0;
-  missile.level= 4;
-  missile.drawflags=MLS_ABSLIGHT;//Powermode?  Translucent when returning?
-  missile.abslight = 1;
-  missile.dmg=random(2, wismod / 2);
-  self.attack_finished=time + 1;
+	missile.bloodloss = time + 0.3;
+	missile.lifetime = time + 3;
+	sound(missile, CHAN_VOICE, "paladin/axblade.wav", 1, ATTN_NORM);
+	missile.think = ThrowHammerThink;
+	setmodel(missile, "models/hamthrow.mdl");
+	setsize(missile,'-1 -2 -4','1 2 4');
+	setorigin(missile, self.origin+self.proj_ofs + v_forward * FL_SWIM);
+	missile.avelocity = '-500 0 0';
+	missile.aflag = 0;
+	missile.level= 4;
+	missile.drawflags=MLS_ABSLIGHT;//Powermode?  Translucent when returning?
+	missile.abslight = 1;
+	missile.dmg=random(wismod, wismod * 1.5);
 
-  if (tome)
-  {
+	self.attack_finished=time + 1;
+
+	if (tome)
+	{
 	  missile.dmg *= 1.5;
-  }
+	}
 }
 
 void warhammer_gone ()
@@ -263,9 +276,10 @@ void warhammer_gone ()
 	self.weaponframe=0;
 }
 
-void warhammer_throw (float tome)
+void warhammer_throw ()
 {
-	float wismod;
+	float wismod, tome;
+	tome = self.artifact_active&ART_TOMEOFPOWER;
 	
 	wismod = self.wisdom;
 	
@@ -420,9 +434,12 @@ void warhammer_select (void)
 	}
 }
 
-void warhammer_c (float tome)
+void warhammer_c ()
 {
 	vector ofs;
+	
+	float tome;
+	tome = self.artifact_active&ART_TOMEOFPOWER;
 	
 	makevectors(self.v_angle);
 	self.th_weapon=warhammer_c;
@@ -448,9 +465,11 @@ void warhammer_c (float tome)
 		warhammer_return();
 }
 
-void warhammer_b (float tome)
+void warhammer_b ()
 {
 	vector ofs;
+	float tome;
+	tome = self.artifact_active&ART_TOMEOFPOWER;
 	
 	makevectors(self.v_angle);
 	self.th_weapon=warhammer_b;
@@ -473,8 +492,11 @@ void warhammer_b (float tome)
 		warhammer_select();
 }	
 
-void warhammer_a (float tome)
-{	
+void warhammer_a ()
+{
+	float tome;
+	tome = self.artifact_active&ART_TOMEOFPOWER;
+
 	vector ofs;
 	makevectors(self.v_angle);
 	self.th_weapon=warhammer_a;
@@ -502,24 +524,21 @@ void warhammer_a (float tome)
 void Cru_Wham_Fire (float rightclick)
 {
 	float r;
-	float tome;
-	
-	tome = self.artifact_active&ART_TOMEOFPOWER;
 	
 	if(rightclick && self.bluemana >= HAMMER_THROW_COST)
 	{
-		warhammer_throw(tome);
+		warhammer_throw();
 	}
 	else
 	{
 		self.attack_finished = time + .7;  // Attack every .7 seconds
 		r = rint(random(1,3));
 		if (r==1)
-			warhammer_a(tome);
+			warhammer_a();
 		else if (r==2)
-			warhammer_b(tome);
+			warhammer_b();
 		else if (r==3)
-			warhammer_c(tome);
+			warhammer_c();
 	}
 }
 

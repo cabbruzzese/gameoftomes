@@ -695,7 +695,7 @@ void ghost_think ()
 
 void spawn_ghost (entity attacker)
 {
-float r;
+	float r;
 	newmis=spawn();
 	newmis.movetype=MOVETYPE_NOCLIP;
 	newmis.solid=SOLID_TRIGGER;

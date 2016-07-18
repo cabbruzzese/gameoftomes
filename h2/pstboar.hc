@@ -147,6 +147,7 @@ float PB_STAGE_BACKUP		= 7;
 
 void rider_death();
 
+void()multiplayer_health;
 
 void hive_trail ()
 {

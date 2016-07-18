@@ -1,6 +1,17 @@
 /*
  * $Header: /cvsroot/uhexen2/gamecode/hc/h2/corpse.hc,v 1.2 2007-02-07 16:56:59 sezero Exp $
  */
+ 
+void monster_imp_ice (void);
+void monster_imp_fire (void);
+void monster_archer (void);
+void monster_skull_wizard (void);
+void monster_scorpion_black (void);
+void monster_scorpion_yellow (void);
+void monster_spider_yellow_large (void);
+void monster_spider_yellow_small (void);
+void monster_spider_red_large (void);
+void monster_spider_red_small (void);
 void monster_golem_stone (void);
 void monster_golem_iron (void);
 void monster_golem_bronze (void);
@@ -9,10 +20,11 @@ void monster_mummy_lord (void);
 void monster_werejaguar (void);
 void monster_mezzoman (void);
 void monster_werepanther (void);
+
 		
  void wandering_monster_respawn()
  {
-	vector newangle,spot1,spot2,spot3;
+	vector newangle,spot1,spot2;
 	float loop_cnt;
 	
 	//check if anything is in the path of spawning

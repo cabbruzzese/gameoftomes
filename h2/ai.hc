@@ -1172,6 +1172,7 @@ void func_monsterspawn_spot (void)
 		self.use=spawnspot_activate;
 }
 
-void hive_die(){}
-void spawn_ghost (entity attacker){}
+//These functions were only redefined to compile split progs.dat and progs2.dat. They are combined in HoT client
+//void hive_die(){}
+//void spawn_ghost (entity attacker){}
 
