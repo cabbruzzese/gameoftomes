@@ -139,10 +139,12 @@ void monster_werepanther (void);
 	}
 
 	self.nextthink = time + 0.01;
+	
+	CreateRedCloud (self.origin + '0 0 40','0 0 0',HX_FRAME_TIME);
  }
 
 float WANDERING_MONSTER_TIME_MIN = 120; //2 minutes
-float WANDERING_MONSTER_TIME_MAX = 360; //7 minutes
+float WANDERING_MONSTER_TIME_MAX = 600; //10 minutes
 
 void MarkForRespawn (void)
 {
