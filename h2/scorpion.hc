@@ -158,14 +158,7 @@ void ScorpionInit(float type)
 
 	if not(self.flags2&FL_SUMMONED)
 	{
-		precache_model2("models/scorpion.mdl");
-
-		precache_sound2("scorpion/awaken.wav");
-		precache_sound2("scorpion/walk.wav");
-		precache_sound2("scorpion/clawsnap.wav");
-		precache_sound2("scorpion/tailwhip.wav");
-		precache_sound2("scorpion/pain.wav");
-		precache_sound2("scorpion/death.wav");
+		precache_scorpion();
 	}
 	setmodel(self, "models/scorpion.mdl");
 

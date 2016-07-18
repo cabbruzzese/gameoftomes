@@ -347,7 +347,10 @@ void SpiderInit(float type)
 	if(self.spawnflags&ONWALL)
 		spider_onwall_wait_init();
 	else
-		walkmonster_start();
+	{
+		sdprint("SummonMonsterStart", FALSE);
+		walkmonster_start();		
+	}
 }
 
 
@@ -589,8 +592,10 @@ void SpiderPause(void) [++ $swait1..$swait26]
 
 void SpiderRun(void) [++ $swalk1..$swalk16]
 {
+	sdprint("Spider Running", TRUE);
 	if((self.spiderActiveCount += 1) > self.spiderGoPause && random()>skill/5)
 	{ // Pause for a bit
+		sdprint("Sprider Pausing", TRUE);
 		SpiderPauseInit();
 		return;
 	}

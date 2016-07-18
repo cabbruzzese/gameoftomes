@@ -256,8 +256,6 @@ float shard_count;
 
 void bone_power_touch ()
 {
-	vector randomvec;
-
 	sound(self,CHAN_WEAPON,"necro/bonephit.wav",1,ATTN_NORM);
 
 	if(other.takedamage)
@@ -413,24 +411,54 @@ vector ofs;
 }
 
 void monster_spider_yellow_large(void);
+void monster_spider_red_large(void);
+void monster_scorpion_yellow (void);
+void monster_scorpion_black (void);
+void monster_mummy(void);
 void CorpseThink(void);
 
 void raise_dead_think()
 {
-	monster_spider_yellow_large();
+	float intmod;
+	
+	//get intelligence value and reset count
+	intmod = self.cnt;
+	newmis.cnt = 0;
+	if (intmod > 48)
+	{
+		monster_mummy();
+	}
+	else if (intmod > 40)
+	{
+		monster_scorpion_black ();
+	}
+	else if (intmod > 32)
+	{
+		monster_spider_red_large();
+	}
+	else if (intmod > 24)
+	{
+		monster_scorpion_yellow();
+	}
+	else
+	{
+		monster_spider_yellow_large();
+	}
 	
 	self.experience_value = 0; //no XP for summoned monsters
+	self.th_die = chunk_death; //summoned monsters explode, don't respawn
 }
 
 void raise_dead(entity body, float intmod)
 {
-	vector newpos;
+	vector newpos, newangles;
 	entity newmis;
 	
 	newpos = body.origin;
+	newangles = body.angles;
 	
 	//gib body
-	body.think = chunk_death;
+	body.think = chunk_death;	
 	body.nextthink = 0.1;
 	
 	//ghost effect
@@ -439,8 +467,10 @@ void raise_dead(entity body, float intmod)
 	//spawn monster
 	newmis = spawn ();
 	newmis.origin = newpos;
+	newmis.angles = newangles;
 	
 	newmis.flags2 (+) FL_SUMMONED;
+	newmis.flags2(+)FL_ALIVE;
 	newmis.lifetime = time + (intmod * 2);
 	newmis.think = raise_dead_think;
 	newmis.nextthink = time + 0.05;
@@ -458,13 +488,15 @@ void raise_dead(entity body, float intmod)
 	}
 	newmis.monster_awake=TRUE; //start awake
 	newmis.team=self.team;
+	
+	//User count property to choose spawn type
+	newmis.cnt = self.intelligence;
 }
 
 void bone_raise_dead()
 {
 	vector	source;
 	vector	org;
-	float damg;
 	float intmod, wismod;
 	float tome;
 	

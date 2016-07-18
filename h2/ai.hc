@@ -28,6 +28,20 @@ time > .pausetime.
 walkmove(angle, speed) primitive is all or nothing
 */
 
+void sdprint (string dmess, float includeEnemy)
+{
+	if(self.playercontrolled)
+	{		
+		dprint(dmess);
+		if (includeEnemy)
+		{
+			dprint(" enemy: ");
+			dprint(self.enemy.classname);
+		}
+		dprint("\n");
+	}
+}
+
 float ArcherCheckAttack (void);
 float MedusaCheckAttack (void);
 void()SetNextWaypoint;
@@ -266,6 +280,8 @@ float		ideal, move;
 
 void() HuntTarget =
 {
+	sdprint("Hunting target... ", TRUE);
+
 	self.goalentity = self.enemy;
 	if(self.spawnflags&PLAY_DEAD)
 	{
@@ -337,9 +353,19 @@ float		r;
 // spawnflags & 3 is a big hack, because zombie crucified used the first
 // spawn flag prior to the ambush flag, and I forgot about it, so the second
 // spawn flag works as well
+	sdprint("Summon monster finding any target", TRUE);
     if(!deathmatch&&(self.playercontrolled||self.classname=="cube_of_force"))
-		return FindMonsterTarget();
+	{
+		sdprint("Summon monster finding Monster target", TRUE);
+		if (FindMonsterTarget())
+		{
+			HuntTarget();
+			return TRUE;
+		}
+		return FALSE;
+	}
 
+	sdprint("Summon monster finding Player target", TRUE);
 	if (sight_entity_time >= time&&sight_entity!=world)
 	{
 		client = sight_entity;
@@ -500,16 +526,20 @@ The monster is staying in one place for a while, with slight angle turns
 */
 void() ai_stand =
 {
+	sdprint("Summon monster standing", FALSE);
 	MonsterCheckContents();
 	
+	sdprint("Summon monster contents are ok", FALSE);
 	if (FindTarget (FALSE))
 		return;
 	
+	sdprint("Summon monster found target", TRUE);
 	if(self.spawnflags&PLAY_DEAD)
 		return;
 
 	if (time > self.pausetime)
 	{
+		sdprint("Summon monster start walking", TRUE);
 		self.th_walk ();
 		return;
 	}
@@ -660,6 +690,7 @@ The monster has an enemy it is trying to kill
 */
 void(float dist) ai_run =
 {
+	sdprint("Doing AI run... ", FALSE);
 	
 	MonsterCheckContents();
 	
@@ -667,6 +698,8 @@ void(float dist) ai_run =
 // see if the enemy is dead
 	if (!self.enemy.flags2&FL_ALIVE||(self.enemy.artifact_active&ARTFLAG_STONED&&self.classname!="monster_medusa"))
 	{
+		sdprint("summoned monster target dead ", TRUE);
+
 		self.enemy = world;
 	// FIXME: look all around for other targets
 		if (self.oldenemy.health > 0)
@@ -701,15 +734,19 @@ void(float dist) ai_run =
 	enemy_vis = visible(self.enemy);
 	if (enemy_vis)
 	{
+		sdprint("Target alive and visible... ", TRUE);
+		
 		self.search_time = time + 5;
 		if(self.mintel)
 		{
+			sdprint("Summoned monster is smart enough to see it ", TRUE);
 			self.goalentity=self.enemy;
 		    self.wallspot=(self.enemy.absmin+self.enemy.absmax)*0.5;
 		}
 	}
 	else
 	{
+		sdprint("Can't see target ", TRUE);
 		if(coop)
 		{
 			if(!FindTarget(TRUE))
@@ -722,6 +759,8 @@ void(float dist) ai_run =
 					SetNextWaypoint();
 		}
 		if(self.mintel)
+		{
+			sdprint("Smart enough to find target ", TRUE);
 			if(self.model=="models/spider.mdl")
 			{
 				if(random()<0.5)
@@ -729,6 +768,7 @@ void(float dist) ai_run =
 			}
 			else 
 				SetNextWaypoint();
+		}
 	}
 
 	if(random()<0.5&&(!self.flags&FL_SWIM)&&(!self.flags&FL_FLY)&&(self.spawnflags&JUMP))
@@ -747,12 +787,16 @@ void(float dist) ai_run =
 	
 	if ((self.attack_state == AS_MISSILE) || (self.attack_state == AS_MELEE))  // turning to attack
 	{
+		sdprint("Turning to attack ", TRUE);
 		ai_attack_face ();
 		return;
 	}
 
 	if (CheckAnyAttack ())
+	{
+		sdprint("Is allowed to attack ", TRUE);
 		return;					// beginning an attack
+	}
 		
 	if (self.attack_state == AS_SLIDING)
 	{

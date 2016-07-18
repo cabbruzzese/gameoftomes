@@ -2,6 +2,9 @@
  * $Header: /cvsroot/uhexen2/gamecode/hc/h2/ai2.hc,v 1.2 2007-02-07 16:56:55 sezero Exp $
  */
 void(entity etemp, entity stemp, entity stemp, float dmg) T_Damage;
+
+void sdprint (string dmess, float includeEnemy);
+
 /*
 
 .enemy
@@ -259,6 +262,8 @@ float		ideal, move;
 
 void() HuntTarget =
 {
+	sdprint("Hunting target... ", TRUE);
+	
 	self.goalentity = self.enemy;
 	if(self.spawnflags&PLAY_DEAD)
 	{
@@ -497,16 +502,20 @@ The monster is staying in one place for a while, with slight angle turns
 */
 void() ai_stand =
 {
+	sdprint("AI2 - Summon monster standing", FALSE);
 	MonsterCheckContents();
 	
+	sdprint("AI2 - Summon monster contents are ok", FALSE);
 	if (FindTarget (FALSE))
 		return;
 	
+	sdprint("AI2 - Summon monster found target", TRUE);
 	if(self.spawnflags&PLAY_DEAD)
 		return;
 
 	if (time > self.pausetime)
 	{
+		sdprint("AI2 - Summon monster start walking", TRUE);
 		self.th_walk ();
 		return;
 	}
@@ -654,6 +663,7 @@ The monster has an enemy it is trying to kill
 */
 void(float dist) ai_run =
 {
+	sdprint("AI2 - Doing AI run... ", FALSE);
 	
 	MonsterCheckContents();
 	
@@ -661,6 +671,8 @@ void(float dist) ai_run =
 // see if the enemy is dead
 	if (!self.enemy.flags2&FL_ALIVE||(self.enemy.artifact_active&ARTFLAG_STONED&&self.classname!="monster_medusa"))
 	{
+		sdprint("AI2 - summoned monster target dead ", TRUE);
+		
 		self.enemy = world;
 	// FIXME: look all around for other targets
 		if (self.oldenemy.health > 0)
@@ -695,15 +707,19 @@ void(float dist) ai_run =
 	enemy_vis = visible(self.enemy);
 	if (enemy_vis)
 	{
+		sdprint("AI2 - Target alive and visible... ", TRUE);
+		
 		self.search_time = time + 5;
 		if(self.mintel)
 		{
+			sdprint("AI2 - Summoned monster is smart enough to see it ", TRUE);
 			self.goalentity=self.enemy;
 		    self.wallspot=(self.enemy.absmin+self.enemy.absmax)*0.5;
 		}
 	}
 	else
 	{
+		sdprint("AI2 - Can't see target ", TRUE);
 		if(coop)
 		{
 			if(!FindTarget(TRUE))
@@ -716,6 +732,8 @@ void(float dist) ai_run =
 					SetNextWaypoint();
 		}
 		if(self.mintel)
+		{
+			sdprint("AI2 - Smart enough to find target ", TRUE);
 			if(self.model=="models/spider.mdl")
 			{
 				if(random()<0.5)
@@ -723,6 +741,7 @@ void(float dist) ai_run =
 			}
 			else 
 				SetNextWaypoint();
+		}
 	}
 
 	if(random()<0.5&&(!self.flags&FL_SWIM)&&(!self.flags&FL_FLY)&&(self.spawnflags&JUMP))

@@ -113,14 +113,18 @@ FALSE if not.
 */
 float FindMonsterTarget ()
 {
-entity found;
-float okay;
+	entity found;
+	float okay;
+
+	sdprint ("Summoned monster started finding monster target", TRUE);
     if(self.controller.enemy!=world&&self.controller.enemy.flags2&FL_ALIVE&&visible(self.controller.enemy))
 	{
 		self.enemy=self.controller.enemy;
+		sdprint ("Summoned monster's controller has a target", TRUE);
 		return TRUE;
 	}
 
+	sdprint ("Summoned monster's controller has no target... searching", TRUE);
 	okay=FALSE;
 	found=findradius(self.origin,1000);
 	while(found!=world)
@@ -131,6 +135,8 @@ float okay;
 					if(found!=self.controller)
 						if(found.controller!=self.controller)
 						{
+							sdprint ("Summoned monster found a target!", TRUE);
+
 							if(coop)
 							{
 								if(found.classname!="player")
@@ -146,11 +152,14 @@ float okay;
 							if(okay)
 							{
 								self.enemy=found;
+								sdprint ("Returning monster target", TRUE);
 								return TRUE;
 							}
 						}
 		found=found.chain;
 	}
+	
+	sdprint ("Summoned monster found no targets, seeking controller instead", TRUE);
 	if(self.playercontrolled) // if imp, or summoned by player
 		self.enemy=self.controller;
 	return FALSE;

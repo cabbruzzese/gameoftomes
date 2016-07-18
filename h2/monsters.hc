@@ -76,6 +76,8 @@ void() monster_death_use =
 
 void() walkmonster_start_go =
 {
+	sdprint("Summon monster start GO", FALSE);
+	
 	if(!self.touch)
 		self.touch=obj_push;
 
@@ -127,6 +129,8 @@ void() walkmonster_start_go =
 
 	if (self.target)
 	{
+		sdprint("Summon monster start GO - Has a target", FALSE);
+			
 		self.goalentity = self.pathentity = find(world, targetname, self.target);
 		self.ideal_yaw = vectoyaw(self.goalentity.origin - self.origin);
 		if (!self.pathentity)
@@ -153,6 +157,7 @@ void() walkmonster_start_go =
 	}
 	else
 	{
+		sdprint("Summon monster start GO - no target found. Standing", FALSE);
 /*		if(self.spawnflags&PLAY_DEAD&&self.th_possum!=SUB_Null)
 		{
 			self.think=self.th_possum;

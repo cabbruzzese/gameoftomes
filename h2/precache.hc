@@ -1,6 +1,10 @@
 /*
  * $Header: /cvsroot/uhexen2/gamecode/hc/h2/precache.hc,v 1.3 2007-02-07 16:57:09 sezero Exp $
  */
+ 
+void precache_spider ();
+void precache_scorpion ();
+void precache_mummy ();
 
 // called by worldspawn
 void() W_Precache =
@@ -1000,6 +1004,11 @@ void Precache_mdl (void)
 //Miscellaneous Shared
 	precache_model ("models/fireball.mdl");//Fireball traps, imps
 	precache_model ("models/test.mdl");	//For testing
+	
+	//Summoning monsters
+	precache_scorpion();
+	precache_mummy();
+	precache_spider();
 }
 
 
@@ -1103,5 +1112,38 @@ void precache_spider ()
 	precache_sound("spider/step1.wav");
 	precache_sound("spider/step2.wav");
 	precache_sound("spider/step3.wav");
+}
+
+void precache_scorpion ()
+{
+	precache_model2("models/scorpion.mdl");
+
+	precache_sound2("scorpion/awaken.wav");
+	precache_sound2("scorpion/walk.wav");
+	precache_sound2("scorpion/clawsnap.wav");
+	precache_sound2("scorpion/tailwhip.wav");
+	precache_sound2("scorpion/pain.wav");
+	precache_sound2("scorpion/death.wav");
+}
+
+void precache_mummy ()
+{
+	precache_model2("models/mummy.mdl");
+	precache_model2 ("models/larm.mdl");
+	precache_model2 ("models/leg.mdl");
+	precache_model2 ("models/mumshot.mdl");
+	precache_model2 ("models/muhead.mdl");
+
+	precache_sound2 ("mummy/sight.wav");
+	precache_sound2 ("mummy/die.wav");
+	precache_sound2 ("mummy/mislfire.wav");
+	precache_sound2 ("mummy/limbloss.wav");
+	precache_sound2 ("mummy/moan.wav");
+	precache_sound2 ("mummy/pain.wav");
+	precache_sound2 ("mummy/crawl.wav");
+	precache_sound2 ("mummy/slide.wav");
+	precache_sound2 ("mummy/step.wav");
+	precache_sound2 ("mummy/tap.wav");
+	precache_sound2 ("mummy/bite.wav");
 }
 
