@@ -115,7 +115,7 @@ float FindMonsterTarget ()
 {
 entity found;
 float okay;
-	if(self.controller.enemy!=world&&self.controller.enemy.flags2&FL_ALIVE&&visible(self.controller.enemy))
+    if(self.controller.enemy!=world&&self.controller.enemy.flags2&FL_ALIVE&&visible(self.controller.enemy))
 	{
 		self.enemy=self.controller.enemy;
 		return TRUE;
@@ -628,7 +628,7 @@ vector destiny,org;
 		return FALSE;
 	}
 
-	if(trace_ent.health>25||!trace_ent.takedamage||(trace_ent.flags&FL_MONSTER&&trace_ent.classname!="player_sheep"))//target not monster, and target not sheep
+    if(trace_ent.health>25||!trace_ent.takedamage||(trace_ent.flags&FL_MONSTER&&trace_ent.classname!="player_sheep"))
 	{//Don't have a clear shot, and don't want to shoot obstruction
 		self.attack_state = AS_SLIDING;
 		return FALSE;
