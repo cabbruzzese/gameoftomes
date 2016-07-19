@@ -49,7 +49,7 @@ $frame  f1  f2  f3  f4  f5  f6  f7  f8
 
 
 // Frame Code
-void() Ass_Pdgr_Fire;
+void(float rightclick) Ass_Pdgr_Fire;
 
 
 void fire_punchdagger ()
@@ -235,24 +235,119 @@ void () punchdagger_a =
 		punchdagger_idle();
 };
 
+void whip_pull (vector dir, entity targetent)
+{
+	vector upvec;
+	float pullstr1, pullstr2;
+	float totalpull, pullbonus, masstotal;
+	float stationary;
+	
+	upvec = '0 1 0';
+	totalpull = 500;
+	pullbonus = 200;
+	
+	masstotal = self.mass + targetent.mass; //total mass, then divide parts by total to get percentage
+	stationary = FALSE;
+	
+	pullstr1 = (targetent.mass / masstotal) * totalpull; //Get percentage of other entity's mass in total mass (gives larger objects a smaller pull)
+	pullstr2 = (self.mass / masstotal) * totalpull * -1; // inverted to pull towards player
+	
+	//stationay objects
+	if (targetent.mass > 1000 || !targetent.flags2&FL_ALIVE)
+	{
+		stationary = TRUE;
+
+		//only moves player
+		pullstr1 = totalpull;
+		pullstr2 = 0;
+	}
+	
+	pullstr1 += pullbonus;
+	
+	//pull player
+	self.velocity+=dir*pullstr1;
+	self.velocity+=upvec*80;//get off ground
+	self.flags(-)FL_ONGROUND;
+	
+	if (!stationary)
+	{
+		//pull target
+		targetent.velocity+=dir*pullstr2;
+		targetent.velocity+=upvec*80;//get off ground
+		targetent.flags(-)FL_ONGROUND;
+	}
+}
+
+void whip_fire ()
+{
+	vector	source;
+	float strmod, dexmod;
+	float tome;
+	float wdistance;
+	
+	tome = self.artifact_active&ART_TOMEOFPOWER;
+	
+	strmod = self.strength;
+	dexmod = self.dexterity;
+	
+	//if (tome)
+	//{
+	//}
+
+	wdistance = 350;
+	
+	makevectors (self.v_angle);
+	source = self.origin + self.proj_ofs;
+	source += normalize(v_right) * -8;
+	source += normalize(v_up) * -4; //get left hand location offset	
+	traceline (source, source + v_forward*wdistance, FALSE, self);
+
+	self.enemy = trace_ent;
+	if (trace_ent.takedamage)
+	{
+		whip_pull(v_forward, trace_ent);		
+	}
+
+	// hit wall
+	WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
+	WriteByte (MSG_BROADCAST, TE_STREAM_CHAIN);
+	WriteEntity (MSG_BROADCAST, self);
+	WriteByte (MSG_BROADCAST, 1+STREAM_ATTACHED);
+	WriteByte (MSG_BROADCAST, 6);
+	WriteCoord (MSG_BROADCAST, source_x);
+	WriteCoord (MSG_BROADCAST, source_y);
+	WriteCoord (MSG_BROADCAST, source_z);
+	WriteCoord (MSG_BROADCAST, trace_endpos_x);
+	WriteCoord (MSG_BROADCAST, trace_endpos_y);
+	WriteCoord (MSG_BROADCAST, trace_endpos_z);
+}
+
 float r2;
 
-
-void Ass_Pdgr_Fire ()
+void Ass_Pdgr_Fire (float rightclick)
 {
-	self.attack_finished = time + .5;  // Attack every .7 seconds
-//	r2 = rint(random(1,4));
-	if (r2==1)
-		punchdagger_a();
-	else if (r2==2)
-		punchdagger_b();
-	else if (r2==3)
-		punchdagger_c();
+	if (rightclick)
+	{
+		self.attack_finished = time + .5;
+		
+		whip_fire();
+	}
 	else
-		punchdagger_d();
-	r2+=1;
-	if (r2>4)
+	{
+		self.attack_finished = time + .5;  // Attack every .7 seconds
+	//	r2 = rint(random(1,4));
+		if (r2==1)
+			punchdagger_a();
+		else if (r2==2)
+			punchdagger_b();
+		else if (r2==3)
+			punchdagger_c();
+		else
+			punchdagger_d();
+		r2+=1;
+		if (r2>4)
 		r2=1;
+	}
 }
 
 void punchdagger_select (void)

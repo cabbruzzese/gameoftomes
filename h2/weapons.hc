@@ -655,7 +655,7 @@ void W_Attack (float rightclick)
 		else if (self.playerclass==CLASS_NECROMANCER)
 			sickle_decide_attack(rightclickfwd);
 		else if (self.playerclass==CLASS_ASSASSIN)
-			Ass_Pdgr_Fire();
+			Ass_Pdgr_Fire(rightclickfwd);
 		else if (self.playerclass==CLASS_CRUSADER)
 			Cru_Wham_Fire(rightclickfwd);
 	}

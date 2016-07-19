@@ -126,7 +126,10 @@ dprint("\n");
 */
 					if(self.classname=="player_sheep"&&self.flags&FL_ONGROUND&&self.velocity_z>-50)
 						return;
-					T_Damage(self,world,world,magnitude);
+					
+					//apply falling damage/high velocity damage
+					if (self.classname != "player" || self.playerclass != CLASS_ASSASSIN)//assassins don't take fall damage
+						T_Damage(self,world,world,magnitude);
 				}
 			}
 
