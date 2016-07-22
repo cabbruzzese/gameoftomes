@@ -61,8 +61,8 @@ $frame mselect16    mselect17    mselect18    mselect19    mselect20
 $frame select1      select2      select3      select4      select5      
 $frame select6      select7      
 
-float BONE_ATTACK_COST = 7;
-float RAISE_DEAD_COST = 15;
+float BONE_ATTACK_COST = 5;
+float RAISE_DEAD_COST = 13;
 
 /*
 ==============================================================================
@@ -219,7 +219,7 @@ vector shard_vel;
 	newmis.solid=SOLID_PHASE;
 	newmis.effects (+) EF_NODRAW;
 	newmis.touch=bone_shard_touch;
-	newmis.dmg=3;
+	newmis.dmg=6;
 	newmis.think=bone_removeshrapnel;
 	thinktime newmis : 3;
 
@@ -260,20 +260,16 @@ void bone_power_touch ()
 
 	if(other.takedamage)
 	{
-//		dprint("Doing damage\n");
 		T_Damage(other, self,self.owner,self.dmg);
 	}
 	self.flags2(+)FL2_ADJUST_MON_DAM;
-//	dprint("Doing radius damage\n");
-	//T_RadiusDamage(self,self.owner,self.dmg,other);
 
 	self.solid=SOLID_NOT;
-//	dprint("shattering\n");
 	bone_shatter();
-//	dprint("Doing final effect\n");
+
 	starteffect(CE_BONE_EXPLOSION, self.origin-self.movedir*6,'0 0 0', HX_FRAME_TIME);
 	particle4(self.origin,50,random(368,384),PARTICLETYPE_GRAV,10);
-//	dprint("removing\n");
+
 	remove(self);	
 }
 /*
@@ -332,7 +328,7 @@ void bone_smoke ()
 
 void bone_fire(float powered_up, vector ofs)
 {
-	float intmod, wismod;
+	float intmod;
 	float tome;
 	
 	//SOUND
@@ -350,7 +346,6 @@ void bone_fire(float powered_up, vector ofs)
 	
 	tome = self.artifact_active & ART_TOMEOFPOWER;
 	intmod = self.intelligence;
-	wismod = self.wisdom;
 
 	if(powered_up)
 	{
@@ -360,7 +355,7 @@ void bone_fire(float powered_up, vector ofs)
 		newmis.dmg=intmod * 2;
 		
 		if (tome)
-			newmis.dmg = random(intmod * 3, intmod * 4);
+			newmis.dmg = random(intmod * 2, intmod * 4);
 		
 		newmis.frags=TRUE;
 		newmis.touch=bone_power_touch;

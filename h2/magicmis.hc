@@ -60,6 +60,10 @@ $frame select1      select2      select3      select4      select5
 $frame select6      select7      
 
 
+float MMIS_COST = 2;
+float MMIS_TOME_COST = 8;
+float MMIS_SHOCK_COST = 5;
+
 void chain_remove ()
 {
 	if(self.movechain.movechain!=world)
@@ -241,6 +245,83 @@ void FireMagicMissile (float offset, float seeking)
 	thinktime star2 : 0;
 }
 
+void DrawShockEffect (entity lowner,float tag, float lflags, float duration, vector spot1, vector spot2)
+{
+	WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
+	WriteByte (MSG_BROADCAST, TE_STREAM_ICECHUNKS);
+	WriteEntity (MSG_BROADCAST, lowner);
+	WriteByte (MSG_BROADCAST, tag+lflags);
+	WriteByte (MSG_BROADCAST, duration);
+	
+	WriteCoord (MSG_BROADCAST, spot1_x);
+	WriteCoord (MSG_BROADCAST, spot1_y);
+	WriteCoord (MSG_BROADCAST, spot1_z);
+
+	WriteCoord (MSG_BROADCAST, spot2_x);
+	WriteCoord (MSG_BROADCAST, spot2_y);
+	WriteCoord (MSG_BROADCAST, spot2_z);
+}
+
+float FireShockingGrasp (float intmod, float damg)
+{
+	vector targetOrg, diff, forwardDiff;
+	vector beamOrg;
+	entity found;
+	float radius, shockangle, shocksuccess;
+	float beamcount;
+	
+	shocksuccess = FALSE;
+	
+	//intmod starts at about 18 and grows to over 30 by level 7. 
+	//at 18 this is 215 and at 30 this is 275
+	radius = 125 + (5 * intmod); 
+	
+	makevectors(self.v_angle);
+	
+	beamcount = 0;
+	
+	beamOrg = self.origin + ('0 0 1' * self.maxs_y);
+
+	found=findradius(beamOrg,radius);
+	while(found)
+	{
+		if(found!=self && found.takedamage && !found.playercontrolled && found.health)
+		{
+			beamcount += 1;
+			
+			targetOrg = found.origin + ('0 0 1' * (found.maxs_y));
+			
+			//make sure there are no walls in the way
+			traceline (beamOrg, targetOrg, FALSE, self);
+			if (trace_fraction != 1.0 && trace_ent == found)
+			{
+				//get angle
+				diff = found.origin - beamOrg;				
+				forwardDiff = normalize(v_forward) * radius;
+				shockangle = AngleBetween(diff, forwardDiff);
+				
+				dprint("Shock angle: ");
+				dprint(ftos(shockangle));
+				dprint("\n");
+				
+				if (shockangle < 20)
+				{
+					shocksuccess = TRUE;
+
+					//draw effect				
+					DrawShockEffect (self,beamcount,0, 7, beamOrg, targetOrg); //STREAM_TRANSLUCENT
+
+					//Damage target
+					T_Damage(found,self,self,damg);
+				}	
+			}
+		}
+		found=found.chain;
+	}
+	
+	return shocksuccess;
+}
+
 void flash_think ()
 {
 	makevectors(self.owner.v_angle);
@@ -280,27 +361,29 @@ void FireFlash ()
 
 void  mmis_power()
 {
-	float tome;
-	float cost;
+	float wismod, intmod, damg, shocksuccess, tome;
+	
+	wismod = self.wisdom;
+	intmod = self.intelligence;
+	damg = 20 + random(0, wismod);
 	
 	if(self.attack_finished>time)
 		return;
-	
-	tome = self.artifact_active&ART_TOMEOFPOWER;
 
-	FireFlash();
-	FireMagicMissile(0, TRUE);
-	
-	cost = 4;
-	
+	tome = self.artifact_active&ART_TOMEOFPOWER;
 	if (tome)
+		damg *= 2;
+	
+	FireFlash();
+	shocksuccess = FireShockingGrasp(intmod, damg);
+	
+	if (shocksuccess)
 	{
-		FireMagicMissile(-3, TRUE);
-		FireMagicMissile(3, TRUE);
-		cost = 10;
+		sound(newmis,CHAN_AUTO,"necro/mmfire.wav",1,ATTN_NORM);
+
+		self.bluemana-=MMIS_SHOCK_COST;
 	}
 	
-	self.bluemana-=cost;
 	self.attack_finished=time+0.8;
 }
 
@@ -314,19 +397,19 @@ void  mmis_normal()
 
 	tome = self.artifact_active&ART_TOMEOFPOWER;
 	
-	cost = 2;
+	cost = MMIS_COST;
 	FireFlash();
-	FireMagicMissile(0, FALSE);
+	FireMagicMissile(0, TRUE);
 	
 	if (tome)
 	{
-		FireMagicMissile(-3, FALSE);
-		FireMagicMissile(3, FALSE);
-		cost = 8;
+		FireMagicMissile(-3, TRUE);
+		FireMagicMissile(3, TRUE);
+		cost = MMIS_TOME_COST;
 	}
 	
 	self.bluemana-=cost;
-	self.attack_finished=time+0.2;
+	self.attack_finished=time+0.6;
 }
 
 /*======================
@@ -347,19 +430,34 @@ void() Nec_Mis_Attack;
 
 void magicmis_fire (void)
 {
+	float tome, cost;
+	
+	tome = self.artifact_active&ART_TOMEOFPOWER;
+	
 	if(self.button0&&self.weaponframe==$mfire5 &&!self.artifact_active&ART_TOMEOFPOWER)
 		self.weaponframe=$mfire5;
 	else
 		self.wfs = advanceweaponframe($mfire1,$mfire8);
 	self.th_weapon=magicmis_fire;
 	self.last_attack=time;
-	if(self.wfs==WF_CYCLE_WRAPPED||self.bluemana<2||(self.artifact_active&ART_TOMEOFPOWER&&self.bluemana<10))
-		magicmis_ready();
-	else if(self.weaponframe==$mfire5)// &&self.attack_finished<=time)
-		if(self.button1)
+
+	cost = MMIS_COST;
+	if (tome)
+	{
+		cost = MMIS_TOME_COST;
+	}
+	
+	if(self.wfs==WF_CYCLE_WRAPPED||self.bluemana<cost)
+	{
+		magicmis_ready();		
+	}
+	else if(self.weaponframe==$mfire5)
+	{
+		if (self.button1 && self.bluemana >= MMIS_SHOCK_COST)
 			mmis_power();
 		else
 			mmis_normal();
+	}
 }
 
 void() Nec_Mis_Attack =

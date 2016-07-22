@@ -208,3 +208,42 @@ vector v_factorrange(vector start, vector end) : 95;
 string precache_sound3(string s) : 96;
 string precache_model3(string s) : 97;
 string precache_file3(string s) : 98;
+
+float DotProduct (vector v1, vector v2)
+{
+	return (v1_x * v2_x) + (v1_y * v2_y) + (v1_z * v2_z);
+}
+
+float arccos (float x)
+{
+	//from Stack Overflow - Accurate within 0.18 rads (~10 degrees)
+	//source: http://stackoverflow.com/questions/3380628/fast-arc-cos-algorithm
+	return (-0.69813170079773212 * x * x - 0.87266462599716477) * x + 1.5707963267948966; //in radians
+}
+
+float CONST_PI = 3.14159265359; //aprox
+float RadToDegrees(float rad)
+{
+	return rad * (180/CONST_PI);
+}
+
+float AngleBetween(vector v1, vector v2)
+{
+	float dotp;
+	float lengthv1, lengthv2;
+	float cosTheta, angleRad;
+	
+	//dot product
+	dotp = DotProduct(v1, v2);
+	
+	//vector lengths
+	lengthv1 = vlen(v1);
+	lengthv2 = vlen(v2);
+	
+	//dot product over vector length 1 * vector length 2
+	cosTheta = dotp / (lengthv1 * lengthv2);
+	angleRad = arccos(cosTheta);
+	
+	//return in degrees
+	return RadToDegrees(angleRad);
+}

@@ -1268,4 +1268,3 @@ void() func_angletrigger =
 
 	self.inactive = FALSE;	
 };
-
