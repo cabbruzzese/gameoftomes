@@ -39,6 +39,8 @@ $frame power6      power7      power8      power9
 $frame select1      select2      select3      select4      select5      
 $frame select6      select7      select8      select9      select10     
 
+float MACE_DRAIN_COST = 1;
+
 void() IceCubeThink =
 {
 	if(self.freeze_time<time&&skill<3)
@@ -207,13 +209,47 @@ void() FreezeTouch=
 		sound(self,CHAN_BODY,"misc/tink.wav",1,ATTN_NORM);
 };
 
+float FREEZE_WAVE_TOTAL = 10;
 void()FireFreeze=
 {
-//vector    dir;
+	vector    dir;
+	float angletotal, theta, sinpos;
+	float spreadsize, basespeed;
+	float halfwave, wavecount;
+	
+	angletotal = 180;
+	
+	spreadsize = 100;
+	
+	basespeed = 800;
+	
+	//increase wave count
+	halfwave = FREEZE_WAVE_TOTAL / 2;
+	if(self.weaponframe_cnt < FREEZE_WAVE_TOTAL)
+		self.weaponframe_cnt += 1;
+	else
+		self.weaponframe_cnt = 0;
+	
+	wavecount = self.weaponframe_cnt;
+	if (wavecount > halfwave)
+	{
+		//invert for halfwave
+		wavecount = halfwave - wavecount;
+	}
+	
+	//get angle by percent of total;
+	theta = angletotal * (wavecount / halfwave);
+	//theta -= angletotal / 2; //change range from 0:180 to -90:90
+	sinpos = sin(theta);
+	
+	//get direction based on part of wave	
+	makevectors (self.v_angle);	
+	dir = normalize(v_forward) * basespeed;
+	dir += normalize(v_right) * (sinpos * spreadsize);
+	
 	self.bluemana-=1;
 	self.attack_finished=time + 0.05;
 	self.punchangle_x= -1;
-	makevectors (self.v_angle);
     sound (self, CHAN_WEAPON, "crusader/icefire.wav", 1, ATTN_NORM);
 	newmis = spawn ();
     newmis.owner = self;
@@ -225,8 +261,8 @@ void()FireFreeze=
 	
 	newmis.touch = FreezeTouch;
     newmis.classname = "snowball";
-    newmis.speed = 1200;
-	newmis.movedir=normalize(v_forward);
+    newmis.speed = basespeed;
+	newmis.movedir= normalize(dir);
     newmis.velocity = newmis.movedir * newmis.speed;
 	newmis.angles = vectoangles(newmis.velocity);
 	newmis.avelocity=randomv('-600 -600 -600','600 600 600');
@@ -238,7 +274,7 @@ void()FireFreeze=
     setsize (newmis, '0 0 0', '0 0 0');
     setorigin (newmis, self.origin+self.proj_ofs + v_forward*8);
 
-entity corona;
+	entity corona;
 	corona=spawn();
 	newmis.movechain=corona;
 	corona.movetype=MOVETYPE_NOCLIP;
@@ -268,39 +304,39 @@ void shard_hit (void)
 
 void FireShard (void)
 {
-local vector org,dir;
+	local vector org,dir;
 	
-		newmis=spawn();
-		newmis.movetype=MOVETYPE_BOUNCE;
-		newmis.solid=SOLID_TRIGGER;
-		newmis.owner=self.owner;
+	newmis=spawn();
+	newmis.movetype=MOVETYPE_BOUNCE;
+	newmis.solid=SOLID_TRIGGER;
+	newmis.owner=self.owner;
 
-		dir_x=random(50,100);
-		dir_y=random(50,100);
-		dir_z=random(-250,-180);
+	dir_x=random(50,100);
+	dir_y=random(50,100);
+	dir_z=random(-250,-180);
 
-		org_x= random(-84,-8);
-		org_y= random(-84,-8);
-		if(org_x<64)
-			org_z=64+org_x;
-		else if(org_y<64)
-			org_z=64+org_y;
-		org_x+=self.origin_x;
-		org_y+=self.origin_y;
-		org_z+=self.origin_z+64;
-		traceline(self.origin,org,TRUE,self);
-		org=trace_endpos;
+	org_x= random(-84,-8);
+	org_y= random(-84,-8);
+	if(org_x<64)
+		org_z=64+org_x;
+	else if(org_y<64)
+		org_z=64+org_y;
+	org_x+=self.origin_x;
+	org_y+=self.origin_y;
+	org_z+=self.origin_z+64;
+	traceline(self.origin,org,TRUE,self);
+	org=trace_endpos;
 
-		newmis.velocity=dir;
-		newmis.angles=vectoangles(newmis.velocity)+'90 0 0';
-		newmis.scale=random(0.05,0.55);
-		newmis.skin=0;
-		newmis.frame=0;
-		newmis.touch=shard_hit;
+	newmis.velocity=dir;
+	newmis.angles=vectoangles(newmis.velocity)+'90 0 0';
+	newmis.scale=random(0.05,0.55);
+	newmis.skin=0;
+	newmis.frame=0;
+	newmis.touch=shard_hit;
 
-		setmodel(newmis,"models/shard.mdl");
-		setsize(newmis,'0 0 0','0 0 0');
-		setorigin(newmis,org);
+	setmodel(newmis,"models/shard.mdl");
+	setsize(newmis,'0 0 0','0 0 0');
+	setorigin(newmis,org);
 }
 	
 void() blizzard_think=
@@ -498,7 +534,6 @@ ready to relax(after short delay)
 relax to ready(Fire delay?  or automatic if see someone?)
 =======================*/
 
-void() Cru_Ice_Fire;
 void icestaff_idle (void)
 {
 	self.th_weapon=icestaff_idle;
@@ -510,6 +545,9 @@ void icestaff_select (void)
 	self.th_weapon=icestaff_select;
 	self.wfs = advanceweaponframe($select1,$select10);
 	self.weaponmodel = "models/icestaff.mdl";
+
+	self.weaponframe_cnt = 10;//default to half of sine wave
+		
 	if (self.wfs==WF_CYCLE_WRAPPED)
 	{
 		self.attack_finished = time - 1;
@@ -522,6 +560,8 @@ void icestaff_deselect (void)
 	self.wfs = advanceweaponframe($select10,$select1);
 	self.th_weapon=icestaff_deselect;
 
+	self.weaponframe_cnt = 0;//reset sine wave
+	
 	if (self.wfs == WF_LAST_FRAME)
 		W_SetCurrentAmmo();
 }
@@ -633,7 +673,7 @@ void icestaff_f5 (void)
 
 void icestaff_shard (void)
 {
-float r;
+	float r;
 	r=rint(random(4)) + 1;
 	if(r==1)
 		icestaff_f1();
@@ -647,11 +687,128 @@ float r;
 		icestaff_f5();
 }
 
-void Cru_Ice_Fire (void)
+void DrawDrainEffect (entity lowner,float tag, float lflags, float duration, vector spot1, vector spot2)
 {
-	if(self.artifact_active&ART_TOMEOFPOWER)
+	WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
+	WriteByte (MSG_BROADCAST, TE_STREAM_COLORBEAM);
+	WriteEntity (MSG_BROADCAST, lowner);
+	WriteByte (MSG_BROADCAST, tag+lflags);
+	WriteByte (MSG_BROADCAST, duration);
+	WriteByte (MSG_BROADCAST, 1);			//color
+	
+	WriteCoord (MSG_BROADCAST, spot1_x);
+	WriteCoord (MSG_BROADCAST, spot1_y);
+	WriteCoord (MSG_BROADCAST, spot1_z);
+
+	WriteCoord (MSG_BROADCAST, spot2_x);
+	WriteCoord (MSG_BROADCAST, spot2_y);
+	WriteCoord (MSG_BROADCAST, spot2_z);
+}
+
+float FireIceMaceDrain (float intmod, float damg)
+{
+	vector targetOrg, diff, forwardDiff;
+	vector beamOrg;
+	entity found;
+	float radius, shockangle, drainsuccess;
+	float beamcount;
+	
+	drainsuccess = FALSE;
+	
+	radius = 100 + (5 * intmod); 
+	
+	makevectors(self.v_angle);
+	
+	beamcount = 0;
+	
+	beamOrg = self.origin + self.proj_ofs + (normalize(v_forward) * 20);
+
+	found=findradius(beamOrg,radius);
+	while(found)
+	{
+		if(found!=self && found.takedamage && !found.playercontrolled && found.health && found.flags2&FL_ALIVE && beamcount < 3)
+		{
+			beamcount += 1; //Capping total beams at 3 for performance and issue with applying flags to number of beams
+			
+			targetOrg = found.origin + ('0 0 1' * (found.maxs_y));
+			
+			//make sure there are no walls in the way
+			traceline (beamOrg, targetOrg, FALSE, self);
+			if (trace_fraction != 1.0 && trace_ent == found)
+			{
+				//get angle
+				diff = found.origin - self.origin; //use origin for angles to make sure beams spawned inside monsters still hit				
+				forwardDiff = normalize(v_forward) * radius;
+				shockangle = AngleBetween(diff, forwardDiff);
+				
+				dprint("Shock angle: ");
+				dprint(ftos(shockangle));
+				dprint("\n");
+				
+				if (shockangle < 20)
+				{
+					drainsuccess = TRUE;
+
+					//draw effect				
+					DrawDrainEffect (self,beamcount + STREAM_TRANSLUCENT + STREAM_ATTACHED,0, 2, beamOrg, targetOrg);
+
+					//Damage target
+					T_Damage(found,self,self,damg);
+					
+					//heal self
+					self.health += damg / 2;
+					if (self.health > self.max_health)
+						self.health = self.max_health;
+				}	
+			}
+		}
+		found=found.chain;
+	}
+	
+	return drainsuccess;
+}
+
+void  icestaff_drain()
+{
+	float wismod, intmod, damg, drainsuccess;
+	
+	if(self.attack_finished>time)
+		return;
+	
+	wismod = self.wisdom;
+	intmod = self.intelligence;
+	damg = wismod / 5;
+	if (damg < 2)
+		damg = 2;
+	
+	drainsuccess = FireIceMaceDrain(intmod, damg);
+	
+	if (drainsuccess)
+	{
+		sound (self, CHAN_WEAPON, "crusader/icefire.wav", 1, ATTN_NORM);
+
+		self.bluemana-=MACE_DRAIN_COST;
+	}
+	
+	self.attack_finished=time+0.1;
+}
+
+void Cru_Ice_Fire (float rightclick)
+{
+	float tome;
+
+	tome = self.artifact_active&ART_TOMEOFPOWER;
+	
+	if(tome)
 		icestaff_blizzard();
 	else
-		icestaff_shard();
+	{
+		if (rightclick)
+		{
+			icestaff_drain();			
+		}
+		else
+			icestaff_shard();		
+	}
 }
 

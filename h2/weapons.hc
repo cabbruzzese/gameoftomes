@@ -618,9 +618,6 @@ An attack impulse can be triggered now
 void()player_sheep_baa;
 void W_Attack (float rightclick)
 {
-	float rightclickfwd;
-	rightclickfwd = rightclick + 0;
-	
 	if (!W_CheckNoAmmo (self.weapon))
 	{
 		W_BestWeapon ();
@@ -655,15 +652,15 @@ void W_Attack (float rightclick)
 	if (self.weapon == IT_WEAPON1)
 	{
 		if (self.playerclass==CLASS_PALADIN)
-			pal_gauntlet_fire(rightclickfwd);
+			pal_gauntlet_fire(rightclick);
 		else if (self.playerclass==CLASS_NECROMANCER)
-			sickle_decide_attack(rightclickfwd);
+			sickle_decide_attack(rightclick);
 		else if (self.playerclass==CLASS_ASSASSIN)
 		{
 			Ass_Pdgr_Fire();			
 		}
 		else if (self.playerclass==CLASS_CRUSADER)
-			Cru_Wham_Fire(rightclickfwd);
+			Cru_Wham_Fire(rightclick);
 	}
 	else if (self.weapon == IT_WEAPON2)
 	{
@@ -677,7 +674,7 @@ void W_Attack (float rightclick)
 		else if(self.playerclass==CLASS_CRUSADER)
 		{
 			if(self.th_weapon==icestaff_idle)
-				Cru_Ice_Fire();
+				Cru_Ice_Fire(rightclick);
 		}
 		else if(self.playerclass==CLASS_NECROMANCER)
 			Nec_Mis_Attack();

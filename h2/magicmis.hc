@@ -252,7 +252,7 @@ void DrawShockEffect (entity lowner,float tag, float lflags, float duration, vec
 	WriteEntity (MSG_BROADCAST, lowner);
 	WriteByte (MSG_BROADCAST, tag+lflags);
 	WriteByte (MSG_BROADCAST, duration);
-	
+
 	WriteCoord (MSG_BROADCAST, spot1_x);
 	WriteCoord (MSG_BROADCAST, spot1_y);
 	WriteCoord (MSG_BROADCAST, spot1_z);
@@ -280,14 +280,14 @@ float FireShockingGrasp (float intmod, float damg)
 	
 	beamcount = 0;
 	
-	beamOrg = self.origin + ('0 0 1' * self.maxs_y);
+	beamOrg = self.origin + self.proj_ofs + (normalize(v_forward) * 40) + (normalize(v_up) * 6) + (normalize(v_right) * 12);
 
 	found=findradius(beamOrg,radius);
 	while(found)
 	{
-		if(found!=self && found.takedamage && !found.playercontrolled && found.health)
+		if(found!=self && found.takedamage && !found.playercontrolled && found.health && beamcount < 11)
 		{
-			beamcount += 1;
+			beamcount += 1; //Capping total beams at 10 for performance and issue with applying flags to number of beams
 			
 			targetOrg = found.origin + ('0 0 1' * (found.maxs_y));
 			
@@ -296,7 +296,7 @@ float FireShockingGrasp (float intmod, float damg)
 			if (trace_fraction != 1.0 && trace_ent == found)
 			{
 				//get angle
-				diff = found.origin - beamOrg;				
+				diff = found.origin - self.origin; //use origin for angles to make sure beams spawned inside monsters still hit				
 				forwardDiff = normalize(v_forward) * radius;
 				shockangle = AngleBetween(diff, forwardDiff);
 				
@@ -363,12 +363,12 @@ void  mmis_power()
 {
 	float wismod, intmod, damg, shocksuccess, tome;
 	
+	if(self.attack_finished>time)
+		return;
+	
 	wismod = self.wisdom;
 	intmod = self.intelligence;
 	damg = 20 + random(0, wismod);
-	
-	if(self.attack_finished>time)
-		return;
 
 	tome = self.artifact_active&ART_TOMEOFPOWER;
 	if (tome)
@@ -379,7 +379,7 @@ void  mmis_power()
 	
 	if (shocksuccess)
 	{
-		sound(newmis,CHAN_AUTO,"necro/mmfire.wav",1,ATTN_NORM);
+		sound(self,CHAN_AUTO,"necro/mmfire.wav",1,ATTN_NORM);
 
 		self.bluemana-=MMIS_SHOCK_COST;
 	}
