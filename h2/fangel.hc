@@ -819,14 +819,14 @@ void() init_fangel =
 		precache_sound2("fangel/ambi1.wav");
 		self.skin = 0;
 		self.health = 250;
-		self.experience_value = 150;
+		self.experience_value = 250;
 	}
 	else
 	{
 		precache_sound2("fangel/ambi2.wav");
 		self.skin = 1;
 		self.health = 500;
-		self.experience_value = 400;
+		self.experience_value = 500;
 	}
 
 	self.th_stand = fangel_flyframes;

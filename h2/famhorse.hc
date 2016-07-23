@@ -788,7 +788,7 @@ void rider_famine(void)
 	self.flags2 (+) FL_ALIVE;
 	self.monsterclass = CLASS_BOSS;
 	self.yaw_speed = 10;
-	self.experience_value = 500;
+	self.experience_value = 1000;
 
 	create_famrider(self);
 	self.attack_finished = 0;

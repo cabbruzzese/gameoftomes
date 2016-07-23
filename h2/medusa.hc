@@ -951,5 +951,5 @@ void monster_medusa_red (void)
 //	self.skin=1;
 	monster_medusa_green();
 	self.health = 250;
-	self.experience_value = 125;
+	self.experience_value = 200;
 }

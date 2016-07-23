@@ -1516,14 +1516,14 @@ void() monster_werejaguar =
 	self.speed=10;
 	self.yaw_speed = 10;
 	self.health = 250;
-	self.experience_value = 150;
+	self.experience_value = 200;
 	self.monsterclass = CLASS_HENCHMAN;
 	self.mass = 10;
 	self.mintel = 15;//Animal sense of smell makes him a good tracker
 	if(self.classname=="monster_werepanther")
 	{
 		self.monsterclass = CLASS_LEADER;
-		self.experience_value = 300;
+		self.experience_value = 350;
 		self.health=400;
 		self.skin=1;
 	}

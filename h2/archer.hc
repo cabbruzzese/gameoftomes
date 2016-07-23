@@ -732,7 +732,7 @@ void monster_archer ()
 	self.headmodel = "models/archerhd.mdl";
 	self.mintel = 7;
 	self.monsterclass = CLASS_GRUNT;
-	self.experience_value = 25;
+	self.experience_value = 40;
 	self.health = 80;
 
 	self.flags (+) FL_MONSTER;
@@ -792,7 +792,7 @@ void monster_archer_lord ()
 	self.headmodel = "models/archerhd.mdl";
 	self.mintel = 7;
 	self.monsterclass = CLASS_HENCHMAN;
-	self.experience_value = 200;
+	self.experience_value = 300;
 	self.health = 325;
 	self.skin = 1;
 

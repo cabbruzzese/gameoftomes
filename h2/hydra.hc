@@ -787,7 +787,7 @@ void init_hydra(void)
 	self.hull = HULL_SCORPION;
 //self.hull = HULL_HYDRA;
 	self.health = 125;
-	self.experience_value = 50;
+	self.experience_value = 75;
 	self.mintel = 4;
 
 	self.th_stand = hydra_SwimFrames;

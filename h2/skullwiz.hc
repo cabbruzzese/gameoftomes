@@ -1103,7 +1103,7 @@ void monster_skull_wizard (void)
 	skullwizard_init();
 
 	self.health = 150;
-	self.experience_value = 90;
+	self.experience_value = 100;
 	self.monsterclass = CLASS_GRUNT;
 
 	walkmonster_start();
@@ -1126,7 +1126,7 @@ void monster_skull_wizard_lord (void)
 	skullwizard_init();
 
 	self.health = 650;
-	self.experience_value = 325;
+	self.experience_value = 400;
 	self.monsterclass = CLASS_LEADER;
 	self.skin = 1;
 	self.scale = 1.20;

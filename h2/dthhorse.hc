@@ -949,7 +949,7 @@ void rider_death(void)
 
 	setsize (self, '-55 -55 -24', '55 55 100');
 	self.health = 3500;
-	self.experience_value = 1000;
+	self.experience_value = 2000;
 
 	self.dflags = 0;
 	self.rider_gallop_mode = 0;
