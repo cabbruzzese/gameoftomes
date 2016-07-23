@@ -721,3 +721,4 @@ entity	sight_entity;	//So monsters wake up other monsters
 
 .float preventrespawn;
 .float playercontrolled;
+.float whiptime;

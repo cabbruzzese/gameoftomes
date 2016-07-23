@@ -28,6 +28,7 @@ $frame shoot6       shoot7       shoot8       shoot9       shoot10
 $frame shoot11      shoot12      shoot13      shoot14      shoot15      
 $frame shoot16      shoot17      shoot18      shoot19      
 
+float CROSSBOW_ARROW_COST = 2;
 
 void flashspin ()
 {
@@ -229,6 +230,27 @@ float rad,stick;
 	}
 };
 
+void CB_Color_BoltHit(void)
+{
+	if (pointcontents(self.origin) == CONTENT_SKY)
+	{
+		remove(self);
+		return;
+	}
+
+	T_Damage (other, self, self.owner, self.dmg );
+
+	self.origin = self.origin - 8 * normalize(self.velocity) - '0 0 40';
+	sound (self, CHAN_WEAPON, "weapons/explode.wav", 1, ATTN_NORM);
+
+	if (self.classname == "red_arrow")
+		CreateRedSpark (self.origin); 
+	else
+		CreateGreenSpark (self.origin); 
+
+	remove(self);
+}
+
 void ArrowFlyThink (void)
 {
 	if(self.lifetime<time&&self.mins=='0 0 0')
@@ -283,11 +305,12 @@ vector dir;
 	thinktime self : 0;
 }
 
-void(float offset, float tome) FireCB_Bolt =
+void(float offset, float arrowtype, float vel) FireCB_Bolt =
 {
-	float dexmod;
+	float dexmod, spread;
 	
-	dexmod = self.dexterity;
+	dexmod = 12 + (self.dexterity / 3); //scale down dex damage contribution by 66%
+	spread = 50;
 	
 	local entity missile;
 	makevectors(self.v_angle);
@@ -299,43 +322,79 @@ void(float offset, float tome) FireCB_Bolt =
 	missile.health=3;
 	if(deathmatch)
 		offset*=.333;
+
+	missile.thingtype=THINGTYPE_WOOD;
+	missile.movetype=MOVETYPE_FLYMISSILE;
 	
-	missile.dmg = random(dexmod, dexmod * 2);
-	
-	if(tome)
+	if (arrowtype == 0)
 	{
-		missile.frags=TRUE;
-		missile.thingtype=THINGTYPE_METAL;
-		missile.movetype=MOVETYPE_FLYMISSILE;
-		missile.classname="flaming arrow";
-		setmodel(missile,"models/flaming.mdl");
-		missile.dmg *= 1.5;
-		missile.drawflags(+)MLS_FIREFLICKER;
-		missile.th_die=MultiExplode;
-	}
-	else
-	{
-		missile.thingtype=THINGTYPE_WOOD;
-		missile.movetype=MOVETYPE_FLYMISSILE;
+		missile.dmg = random(dexmod, dexmod * 2);
 		missile.classname="bolt";
 		setmodel(missile,"models/arrow.mdl");
-		missile.th_die=chunk_death;
+		missile.touch=CB_BoltHit;
 	}
-	missile.touch=CB_BoltHit;
-	missile.speed=random(700,1200);
-	missile.o_angle=missile.velocity=normalize(v_forward)*missile.speed+v_right*offset;
+	else if (arrowtype == 1)
+	{
+		missile.dmg = random(dexmod * 0.5, dexmod * 1.5); //stunted damage for green arrows
+		setmodel(missile,"models/akarrow.mdl");
+		missile.skin = 0;
+		missile.classname = "green_arrow";
+		missile.touch = CB_Color_BoltHit;
+	}
+	else //(arrowtype == 2)
+	{
+		missile.dmg = random(dexmod * 1.5, dexmod * 2.5); //increased damage for red arrows
+		setmodel(missile,"models/akarrow.mdl");
+		missile.skin = 1;
+		missile.classname = "red_arrow";
+		missile.touch = CB_Color_BoltHit;
+	}
+
+	missile.th_die=chunk_death;
+	
+	missile.speed=vel;
+	missile.o_angle=missile.velocity=normalize(v_forward)*missile.speed+normalize(v_right)*offset*spread;
 	missile.angles=vectoangles(missile.velocity);
 
 	missile.ideal_yaw=TRUE;
 	missile.turn_time = 0;
 	missile.veer=0;
 
-	missile.think= ArrowThink;
-	thinktime missile : 0;
+	//no more homing. Set to remove in 2.5 seconds
+	//missile.think= ArrowThink;
+	missile.think = SUB_Remove;
+	thinktime missile : time + 2.5;
+	
+	//thinktime missile : 0;
 	missile.lifetime=time+0.2;
 
 	setsize(missile,'0 0 0','0 0 0');
 	setorigin(missile,self.origin+self.proj_ofs+v_forward*8);
+};
+
+void(float chargevalue) FireCB_Bolt_charged =
+{
+	if (chargevalue >= 19 && self.bluemana >= CROSSBOW_ARROW_COST * 4)
+	{
+		FireCB_Bolt(-2, 1, 750);
+		FireCB_Bolt(-1, 1, 900);
+		FireCB_Bolt(0, 2, 1000);
+		FireCB_Bolt(1, 1, 900);
+		FireCB_Bolt(2, 1, 750);
+		self.bluemana -= CROSSBOW_ARROW_COST * 4;		
+	}	
+	else if (chargevalue >9 && self.bluemana >= CROSSBOW_ARROW_COST * 2)
+	{
+		FireCB_Bolt(-1, 1, 800);
+		FireCB_Bolt(0, 1, 900);
+		FireCB_Bolt(1, 1, 800);
+		self.bluemana -= CROSSBOW_ARROW_COST * 2;
+	}
+	else if (self.bluemana >= CROSSBOW_ARROW_COST)
+	{
+		FireCB_Bolt(0, 0, 800);
+		self.bluemana -= CROSSBOW_ARROW_COST;
+	}	
 };
 
 
@@ -345,7 +404,7 @@ void crossbow_idle(void)
 	self.weaponframe=$shoot19;
 }
 
-void crossbow_fire (float rightclick)
+void crossbow_fire ()
 {
 	// Pa3PyX: rewrote the code for framerate independence
 	local float advance_frames;
@@ -401,24 +460,12 @@ void crossbow_fire (float rightclick)
 			}
 			// Attack frames were encountered in frame advance --
 			// perform attack actions
-			if (rightclick) {
-				if (attackframe1_passed) {
-					sound(self,CHAN_WEAPON,"assassin/firefblt.wav",1,ATTN_NORM);
-					self.bluemana-=8;
-					FireCB_Bolt(0, tome);
-				}
-				if (attackframe2_passed) {
-					FireCB_Bolt(-100, tome);
-					FireCB_Bolt(100, tome);
-				}
-			}
-			else {
-				if (attackframe1_passed)
-				{
-					sound(self,CHAN_WEAPON,"assassin/firebolt.wav",1,ATTN_NORM);
-					self.bluemana-=2;
-					FireCB_Bolt(0, tome);
-				}
+		
+			if (attackframe1_passed)
+			{
+				sound(self,CHAN_WEAPON,"assassin/firebolt.wav",1,ATTN_NORM);
+				self.bluemana-=2;
+				FireCB_Bolt(0, 0, 800);
 			}
 		}
 		else
@@ -428,6 +475,52 @@ void crossbow_fire (float rightclick)
 		self.th_weapon = crossbow_fire;
 
 	thinktime self: 0;
+}
+
+void crossbow_charge_fire ()
+{	
+	float tome;
+	
+	tome = self.artifact_active & ART_TOMEOFPOWER;
+
+	self.th_weapon=crossbow_charge_fire;	
+	
+	//if on shooting frame and button released, or shooting frame and tome active
+	if ((!self.button0 || tome) && self.weaponframe == $shoot19)
+	{
+		sound(self,CHAN_WEAPON,"assassin/firebolt.wav",1,ATTN_NORM);
+		
+		if (tome) //tome does full power with every shot
+		{
+			self.weaponframe_cnt = 20;
+		}
+		
+		FireCB_Bolt_charged(self.weaponframe_cnt);
+		
+		self.attack_finished=time+0.3;
+		self.weaponframe_cnt=0;
+		
+		self.weaponframe = $shoot1;
+	}
+	//reloaded
+	else if(!self.button0 && self.weaponframe == $shoot18)
+	{
+		self.th_weapon = crossbow_idle;
+	}
+	//if at looping frame
+	else if(self.button0 && self.weaponframe == $shoot19 && !tome)//if charging and not tome
+	{
+		//increase charge and loop
+		if(self.weaponframe_cnt<20)
+			self.weaponframe_cnt+=1;
+		
+		self.attack_finished=time + 0.1;
+	}
+	else
+	{
+		//advance frame
+		self.wfs = advanceweaponframe($shoot1,$shoot19);
+	}	
 }
 
 void crossbow_select (void)

@@ -65,7 +65,8 @@ magicmis.hc
 boner.hc
 ravenstf.hc
 
-punchdgr.hc		// Assassin weapons
+whip.hc			// Assassin weapons
+punchdgr.hc
 assgren.hc
 crossbow.hc
 setstaff.hc

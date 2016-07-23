@@ -630,6 +630,10 @@ void W_Attack (float rightclick)
 	
 	if(self.attack_finished>time)
 		return;
+	
+	//Firing whip, do notattempt regular attack
+	if (self.playerclass==CLASS_ASSASSIN && !self.button0)
+		return;
 
 	if(self.sheep_time>time)
 	{
@@ -655,7 +659,9 @@ void W_Attack (float rightclick)
 		else if (self.playerclass==CLASS_NECROMANCER)
 			sickle_decide_attack(rightclickfwd);
 		else if (self.playerclass==CLASS_ASSASSIN)
-			Ass_Pdgr_Fire(rightclickfwd);
+		{
+			Ass_Pdgr_Fire();			
+		}
 		else if (self.playerclass==CLASS_CRUSADER)
 			Cru_Wham_Fire(rightclickfwd);
 	}
@@ -664,7 +670,10 @@ void W_Attack (float rightclick)
 		if (self.playerclass==CLASS_PALADIN)
 			pal_vorpal_fire();
 		else if(self.playerclass==CLASS_ASSASSIN)
-			crossbow_fire(rightclickfwd);
+		{
+			//crossbow_fire();
+			crossbow_charge_fire();
+		}
 		else if(self.playerclass==CLASS_CRUSADER)
 		{
 			if(self.th_weapon==icestaff_idle)
@@ -678,7 +687,9 @@ void W_Attack (float rightclick)
 		if (self.playerclass==CLASS_PALADIN)
 			pal_axe_fire();
 		else if (self.playerclass==CLASS_ASSASSIN)
+		{
 			grenade_throw();
+		}
 		else if (self.playerclass==CLASS_CRUSADER)
 			Cru_Met_Attack();
 		else if(self.playerclass==CLASS_NECROMANCER)
@@ -689,7 +700,9 @@ void W_Attack (float rightclick)
 		if (self.playerclass==CLASS_PALADIN)
 			pal_purifier_fire();
 		else if(self.playerclass==CLASS_ASSASSIN)
+		{
 			ass_setstaff_fire();
+		}
 		else if (self.playerclass==CLASS_CRUSADER)
 			Cru_Sun_Fire();
 		else if(self.playerclass==CLASS_NECROMANCER)
@@ -980,6 +993,11 @@ Called every frame so impulse events can be handled as well as possible
 void() W_WeaponFrame =
 {
 	ImpulseCommands ();
+
+	if (self.playerclass==CLASS_ASSASSIN && self.button1 && self.whiptime < time)
+	{
+		whip_fire();
+	}
 
 	if (time < self.attack_finished)
 		return;
