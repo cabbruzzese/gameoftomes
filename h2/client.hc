@@ -668,6 +668,8 @@ entity spot;
 	self.plaqueflg = 0;
 	self.artifact_active(-)ARTFLAG_FROZEN|ARTFLAG_STONED;
 
+	self.whiptime = 0;
+	
 	if(self.newclass)
 	{
 		bprint(self.netname);
@@ -874,6 +876,8 @@ entity spot;
 	self.invisible_time+= TimeDiff;
 	self.camptime+= TimeDiff;
 	self.last_attack= self.attack_finished=0;
+	
+	self.whiptime = 0;
 
 	self.light_level = 128;		// So the assassin doesn't go invisible coming out of the teleporter
 
