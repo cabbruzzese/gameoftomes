@@ -763,6 +763,8 @@ void monster_archer_lord ()
 
 	if (!self.flags2 & FL_SUMMONED)
 	{
+		precache_archer();
+		
 		precache_model("models/archer.mdl");
 		precache_model("models/archerhd.mdl");
 
@@ -778,6 +780,10 @@ void monster_archer_lord ()
 		precache_sound ("archer/death2.wav");
 		precache_sound ("archer/draw.wav");
 
+		precache_sound ("archer/growl.wav");
+		precache_sound ("archer/pain.wav");
+		precache_sound ("archer/sight.wav");
+		precache_sound ("archer/death.wav");
 	}
 
 	CreateEntityNew(self,ENT_ARCHER,"models/archer.mdl",archer_die);

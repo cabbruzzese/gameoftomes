@@ -799,15 +799,18 @@ void() init_fangel =
 
 	self.monster_stage = FANGEL_STAGE_WAIT;
 
-	precache_model2 ("models/fangel.mdl");
-	precache_model2 ("models/faspell.mdl");
-	precache_model2 ("models/fablade.mdl");
-	precache_model2 ("models/h_fangel.mdl");
+	if (!self.flags2&FL_SUMMONED)
+	{
+		precache_model2 ("models/fangel.mdl");
+		precache_model2 ("models/faspell.mdl");
+		precache_model2 ("models/fablade.mdl");
+		precache_model2 ("models/h_fangel.mdl");
 
-	precache_sound2("fangel/fly.wav");
-	precache_sound2("fangel/deflect.wav");
-	precache_sound2("fangel/hand.wav");
-	precache_sound2("fangel/wing.wav");
+		precache_sound2("fangel/fly.wav");
+		precache_sound2("fangel/deflect.wav");
+		precache_sound2("fangel/hand.wav");
+		precache_sound2("fangel/wing.wav");
+	}
 
 	CreateEntityNew(self,ENT_FANGEL,"models/fangel.mdl",fangel_deathframes);
 
@@ -869,9 +872,12 @@ New item for QuakeEd
 */
 void() monster_fallen_angel =
 {
-	precache_sound2("fangel/death.wav");
-	precache_sound2("fangel/pain.wav");
-
+	if (!self.flags2&FL_SUMMONED)
+	{
+		precache_sound2("fangel/death.wav");
+		precache_sound2("fangel/pain.wav");
+	}
+	
 	init_fangel();
 };
 
@@ -884,8 +890,14 @@ New item for QuakeEd
 */
 void() monster_fallen_angel_lord =
 {
-	precache_sound2("fangel/death2.wav");
-	precache_sound2("fangel/pain2.wav");
+	if (!self.flags2&FL_SUMMONED)
+	{
+		precache_sound2("fangel/death.wav");
+		precache_sound2("fangel/pain.wav");
+		
+		precache_sound2("fangel/death2.wav");
+		precache_sound2("fangel/pain2.wav");
+	}
 
 	init_fangel();
 };

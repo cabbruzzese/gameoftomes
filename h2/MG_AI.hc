@@ -55,7 +55,7 @@ float base, divider, attack_mod;
 	if(targ.drawflags&DRF_TRANSLUCENT)
 	{
 		if(targ.model=="models/assassin.mdl")
-			divider=3+targ.level;//Bonus for hiding in shadows
+			divider=3+targ.dexterity / 6;//Bonus for hiding in shadows
 		else
 			divider=3;	//Makes it 3 times harder to see
 	}

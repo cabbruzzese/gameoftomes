@@ -20,6 +20,8 @@ void monster_mummy_lord (void);
 void monster_werejaguar (void);
 void monster_mezzoman (void);
 void monster_werepanther (void);
+void monster_medusa(void);
+void monster_fallen_angel (void);
 
 		
  void wandering_monster_respawn()
@@ -69,6 +71,11 @@ void monster_werepanther (void);
 	{
 		self.think = monster_archer;
 	}
+	else if (self.classname == "monster_archer_lord")
+	{
+		self.classname = "monster_archer";
+		self.think = monster_archer;
+	}
 	else if (self.classname == "monster_skull_wizard")
 	{
 		self.think = monster_skull_wizard;
@@ -115,7 +122,8 @@ void monster_werepanther (void);
 	}
 	else if (self.classname == "monster_mummy_lord")
 	{
-		self.think = monster_mummy_lord;
+		self.classname = "monster_mummy";
+		self.think = monster_mummy;
 	}
 	else if (self.classname == "monster_werejaguar")
 	{
@@ -129,11 +137,24 @@ void monster_werepanther (void);
 	{
 		self.think = monster_werepanther;
 	}
+	else if (self.classname == "monster_medusa")
+	{
+		self.think = monster_medusa;
+	}
+	else if (self.classname == "monster_fallen_angel")
+	{
+		self.think = monster_fallen_angel;
+	}
+	else if (self.classname == "monster_fallen_angel_lord")
+	{
+		self.classname = "monster_fallen_angel";
+		self.think = monster_fallen_angel;
+	}
 	else //not a supported respawn
 	{
 		//Don't respawn bosses
 		//Other monsters not supported: 
-		//		monster_golem_crystal, monster_fallen_angel, monster_fallen_angel_lord
+		//		monster_fallen_angel_lord, apocalypse riders, eidelon, etc.
 		remove(self);
 		return;
 	}
@@ -144,7 +165,7 @@ void monster_werepanther (void);
  }
 
 float WANDERING_MONSTER_TIME_MIN = 120; //2 minutes
-float WANDERING_MONSTER_TIME_MAX = 600; //10 minutes
+float WANDERING_MONSTER_TIME_MAX = 666; //11 minutes
 
 void MarkForRespawn (void)
 {
@@ -168,7 +189,7 @@ void MarkForRespawn (void)
 		newmis.origin = self.origin;
 		
 		newmis.flags2 (+) FL_SUMMONED;
-		newmis.lifetime = time + 600;
+		newmis.lifetime = time + 900;
 		newmis.classname = self.classname;
 	
 		newmis.think = wandering_monster_respawn;

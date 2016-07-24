@@ -59,7 +59,6 @@ void fire_punchdagger ()
 	float damg, inertia;
 	float damage_mod;
 	float damage_base;
-	float c_level;
 	float strmod;
 	
 	strmod = self.strength;
@@ -89,12 +88,10 @@ void fire_punchdagger ()
 		if (trace_ent.flags2&FL_ALIVE && !infront_of_ent(self,trace_ent) && self.playerclass==CLASS_ASSASSIN &&
               self.weapon==IT_WEAPON1 && self.level >5)
 		{
-			c_level = self.level;
-			if (c_level > 10)
-				c_level = 10;
-
-			if (random(1,10)<=(c_level - 4))
+			//actual calculation for backstab
+			if (random(1,40)<=(self.dexterity))
 			{
+				dprint("Backstab from punchdgr.hc");
 				damage_base = WEAPON1_PWR_BASE_DAMAGE;
 				damage_mod = WEAPON1_PWR_ADD_DAMAGE;
 				CreateRedFlash(trace_endpos);

@@ -65,7 +65,7 @@ void FireMelee (float damage_base,float damage_mod,float attack_radius)
 		{
 		  if(self.level > 5) /* Pa3PyX: this ability starts at clvl 6 */ {
 		    if((trace_ent.flags2 & FL_ALIVE) && !infront_of_ent(self, trace_ent) &&
-							random(1, 10) < self.level) {
+							random(1, 40) < self.dexterity) {
 			CreateRedFlash(trace_endpos);
 			damage_base*=random(2.5,4);
 			backstab=TRUE;
@@ -78,6 +78,7 @@ void FireMelee (float damage_base,float damage_mod,float attack_radius)
 		T_Damage (trace_ent, self, self, damg);
 		if(!(trace_ent.flags2 & FL_ALIVE) && backstab)
 		{
+			dprint("Backstab from combat.hc");
 			centerprint(self,"Critical Hit Backstab!\n");
 			AwardExperience(self,trace_ent,10);
 		}

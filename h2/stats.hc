@@ -215,7 +215,7 @@ This routine is called (from the game C side) when a player is advanced a level
 (self.level)
 ================
 */
-float STAT_POOL_COUNT = 5;
+float STAT_POOL_COUNT = 7;
 void PlayerAdvanceLevel(float NewLevel)
 {
 	string s2;

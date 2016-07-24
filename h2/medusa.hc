@@ -885,21 +885,24 @@ void monster_medusa_green (void)
 		return;
 	}
 
-	precache_model2("models/medusa.mdl");
-	precache_model2("models/medusa2.mdl");
-	precache_model2("models/snakearr.mdl");
-	precache_model2("models/medhit.spr");
-	precache_model2("models/medhead.mdl");
-	precache_model2("models/medsnake.mdl");
-	precache_sound2("medusa/rattle.wav");
-	precache_sound2("medusa/hiss.wav");
-	precache_sound2("medusa/sight.wav");
-	precache_sound2("medusa/attack1.wav");
-	precache_sound2("medusa/attack2.wav");
-	precache_sound2("medusa/pain.wav");
-	precache_sound2("medusa/death.wav");
-	precache_sound2("medusa/stoned.wav");
-	precache_sound2("medusa/hitplayr.wav");
+	if (!self.flags2&FL_SUMMONED)
+	{
+		precache_model2("models/medusa.mdl");
+		precache_model2("models/medusa2.mdl");
+		precache_model2("models/snakearr.mdl");
+		precache_model2("models/medhit.spr");
+		precache_model2("models/medhead.mdl");
+		precache_model2("models/medsnake.mdl");
+		precache_sound2("medusa/rattle.wav");
+		precache_sound2("medusa/hiss.wav");
+		precache_sound2("medusa/sight.wav");
+		precache_sound2("medusa/attack1.wav");
+		precache_sound2("medusa/attack2.wav");
+		precache_sound2("medusa/pain.wav");
+		precache_sound2("medusa/death.wav");
+		precache_sound2("medusa/stoned.wav");
+		precache_sound2("medusa/hitplayr.wav");
+	}
 
 //	if(random()<0.5)
 //		self.skin=1;
