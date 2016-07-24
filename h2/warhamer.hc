@@ -539,7 +539,7 @@ void Cru_Wham_Fire (float rightclick)
 		self.attack_finished = time + .7;  // Attack every .7 seconds
 		
 		//Top attack if jumping
-		if (self.velocity_y < 0 && !self.flags & FL_ONGROUND)
+		if (!self.flags & FL_ONGROUND)
 		{
 			warhammer_a();
 		}
