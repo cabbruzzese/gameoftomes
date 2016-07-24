@@ -200,6 +200,7 @@
 1 assassin/arrowbrk.wav
 1 assassin/firefblt.wav
 1 assassin/firebolt.wav
+1 archer/draw.wav
 1 assassin/gbounce.wav
 1 assassin/build.wav
 1 assassin/pincer.wav
@@ -247,7 +248,6 @@
 1 archer/pain.wav
 1 archer/sight.wav
 1 archer/death.wav
-1 archer/draw.wav
 1 spider/pain.wav
 1 spider/death.wav
 1 spider/step1.wav

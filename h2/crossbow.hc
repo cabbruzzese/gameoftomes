@@ -383,7 +383,7 @@ void(float chargevalue) FireCB_Bolt_charged =
 		FireCB_Bolt(2, 1, 750);
 		self.bluemana -= CROSSBOW_ARROW_COST * 4;		
 	}	
-	else if (chargevalue >9 && self.bluemana >= CROSSBOW_ARROW_COST * 2)
+	else if (chargevalue > 9 && self.bluemana >= CROSSBOW_ARROW_COST * 2)
 	{
 		FireCB_Bolt(-1, 1, 800);
 		FireCB_Bolt(0, 1, 900);
@@ -513,6 +513,10 @@ void crossbow_charge_fire ()
 		//increase charge and loop
 		if(self.weaponframe_cnt<20)
 			self.weaponframe_cnt+=1;
+		
+		//playnoise on last charge frames
+		if (self.weaponframe_cnt == 19)
+			sound (self, CHAN_WEAPON, "archer/draw.wav", 1, ATTN_NORM);
 		
 		self.attack_finished=time + 0.1;
 	}

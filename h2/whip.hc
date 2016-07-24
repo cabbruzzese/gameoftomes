@@ -77,7 +77,7 @@ void whip_fire ()
 	{
 		whip_pull(dir, trace_ent);		
 	}
-	else if (pointcontents(trace_endpos) != CONTENT_SKY) //walls (but not sky)
+	else if (trace_fraction < 1.0 && pointcontents(trace_endpos) != CONTENT_SKY) //walls (but not sky)
 	{
 		whip_pull_solid(dir, trace_endpos);
 	}

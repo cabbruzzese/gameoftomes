@@ -402,7 +402,7 @@ void AwardExperience(entity ToEnt, entity FromEnt, float Amount)
 		ToEnt.experience += Amount;
 		xpneeded = GetPlayerXPNeeded(ToEnt.level);
 		
-		while (ToEnt.experience > xpneeded)
+		while (ToEnt.experience >= xpneeded)
 		{
 			SaveSelf = self;
 			self = ToEnt;

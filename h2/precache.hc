@@ -716,7 +716,8 @@ void Precache_wav (void)
 	precache_sound ("assassin/arr2wood.wav");	
 	precache_sound ("assassin/arrowbrk.wav");
 	precache_sound ("assassin/firefblt.wav");	
-	precache_sound ("assassin/firebolt.wav");	
+	precache_sound ("assassin/firebolt.wav");
+	precache_sound ("archer/draw.wav");
 	//Grenades
 	precache_sound ("assassin/gbounce.wav");	
 	//Scarab Staff

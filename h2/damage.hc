@@ -606,8 +606,9 @@ entity holdent;
 	if(targ.flags&FL_MONSTER&&inflictor.flags2&FL2_ADJUST_MON_DAM)
 		damage*=2;//Special- more damage against monsters
 
-	if (attacker.super_damage)
-		damage += attacker.super_damage * damage;
+	//No longer apply super damage to all attacks (only to melee)
+	//if (attacker.super_damage)
+		//damage += attacker.super_damage * damage;
 
 	// Calculating Damage to a player
 	if (targ.classname == "player")

@@ -364,6 +364,11 @@ void warhammer_fire (string hitdir, vector ofs, float tome)
 			{
 				damg = damg * 1.5;
 			}
+			
+			if (self.super_damage)
+			{
+				damg += strmod * 1.5;
+			}
 
 			if(inertia<100)//don't move anything more than 1000 mass
 			{
@@ -532,13 +537,20 @@ void Cru_Wham_Fire (float rightclick)
 	else
 	{
 		self.attack_finished = time + .7;  // Attack every .7 seconds
-		r = rint(random(1,3));
-		if (r==1)
+		
+		//Top attack if jumping
+		if (self.velocity_y < 0 && !self.flags & FL_ONGROUND)
+		{
 			warhammer_a();
-		else if (r==2)
-			warhammer_b();
-		else if (r==3)
-			warhammer_c();
+		}
+		else
+		{
+			r = rint(random(1,2));
+			if (r==1)
+				warhammer_b();
+			else
+				warhammer_c();
+		}
 	}
 }
 

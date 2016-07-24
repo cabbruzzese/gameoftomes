@@ -1537,7 +1537,9 @@ void init_imp (float which_skin)
 		else
 		{
 			self.max_health=self.health = 75+self.skin*25;
-			self.experience_value = 400 +self.skin*100;
+			self.experience_value = 100;
+			if (self.classname == "monster_imp_ice")
+				self.experience_value = 250;
 			self.mass = 3;
 			self.th_die = imp_die_init;
 		}
