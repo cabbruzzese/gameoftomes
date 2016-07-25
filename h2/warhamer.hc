@@ -528,8 +528,6 @@ void warhammer_a ()
 
 void Cru_Wham_Fire (float rightclick)
 {
-	float r;
-	
 	if(rightclick && self.bluemana >= HAMMER_THROW_COST)
 	{
 		warhammer_throw();
@@ -545,8 +543,7 @@ void Cru_Wham_Fire (float rightclick)
 		}
 		else
 		{
-			r = rint(random(1,2));
-			if (r==1)
+			if (random(1) > 0.5)
 				warhammer_b();
 			else
 				warhammer_c();

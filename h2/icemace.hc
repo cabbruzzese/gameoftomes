@@ -219,7 +219,7 @@ void()FireFreeze=
 	
 	angletotal = 180;
 	
-	spreadsize = 100;
+	spreadsize = 90;
 	
 	basespeed = 800;
 	
