@@ -42,7 +42,7 @@ $frame select1      select2      select3      select4      select5
 $frame select6      select7      select8      select9      select10     
 
 float SICKLE_LIGHTNING_COST = 1;
-float SICKLE_LIGHTNING_DIV = 10;
+float SICKLE_LIGHTNING_DIV = 14; //doubling damage too early makes this overpowered
 float SICKLE_LIGHTNING_DIV_TOME = 5;
 float SICKLE_LIGHTNING_MAX = 7;
 
@@ -62,7 +62,7 @@ void sickle_lightning_fire ()
 	intmod = self.intelligence;
 	wismod = self.wisdom;
 	
-	damg = wismod * 0.4;
+	damg = 8 + wismod / 5; //about 10 damage per strike
 	lightning_div = SICKLE_LIGHTNING_DIV;
 	
 	if (tome)
@@ -80,6 +80,10 @@ void sickle_lightning_fire ()
 	if (number_strikes > SICKLE_LIGHTNING_MAX)
 	{
 		number_strikes = SICKLE_LIGHTNING_MAX;
+	}
+	if (number_strikes < 1)
+	{
+		number_strikes = 1;
 	}
 
 	makevectors (self.v_angle);
@@ -124,8 +128,11 @@ void sickle_fire ()
 	float damage_mod;
 	float damage_base;
 	float chance,point_chance,drain_ok;
+	float strmod;
+	
+	strmod = self.strength;
 
-	damage_mod = 10;
+	damage_mod = strmod;
 
 	makevectors (self.v_angle);
 	source = self.origin + self.proj_ofs;

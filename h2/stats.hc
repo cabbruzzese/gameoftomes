@@ -215,7 +215,7 @@ This routine is called (from the game C side) when a player is advanced a level
 (self.level)
 ================
 */
-float STAT_POOL_COUNT = 7;
+float STAT_POOL_COUNT = 4;
 void PlayerAdvanceLevel(float NewLevel)
 {
 	string s2;
@@ -291,8 +291,14 @@ void PlayerAdvanceLevel(float NewLevel)
 			self.health = self.max_health;			
 		}
 		
+		//base stat increase of 1 for all
+		self.strength += 1;
+		self.wisdom += 1;
+		self.intelligence += 1;
+		self.dexterity += 1;
+		
 		//increase stats at random
-		statpool = STAT_POOL_COUNT; //leveling twice as fast, means awarding stats half as fast
+		statpool = STAT_POOL_COUNT; //distribute more at random, and favor highest stats
 		while(statpool > 0)
 		{
 			//create a tower of existing stats
@@ -498,6 +504,12 @@ void drop_level (entity loser,float number)
 		loser.experience=0;
 	}
 	
+	//base stat decrease of 1 for all
+	self.strength -= 1;
+	self.wisdom -= 1;
+	self.intelligence -= 1;
+	self.dexterity -= 1;
+		
 	//randomly punish stats
 	statpool = STAT_POOL_COUNT;
 	while(statpool > 0)
@@ -542,5 +554,17 @@ void drop_level (entity loser,float number)
 	
 	//reset armor
 	ApplyNaturalArmor(self);
+}
+
+//Classes with special magical attacks must have enough intelligence to use them
+// i.e. paladin vorpal sword lightning attack
+float HasSpecialAttackInt (entity ent)
+{
+	if (ent.intelligence >= 14)
+	{
+		return TRUE;
+	}
+	
+	return FALSE;
 }
 

@@ -155,14 +155,14 @@ axeblade_fire
 void(float rightclick, float tome) axeblade_fire =
 {
 	float damg;
-	float strmod, dexmod;
+	float strmod, wismod;
 	
 	strmod = self.strength;
-	dexmod = self.dexterity;
+	wismod = self.wisdom;
 	
 	if (rightclick)
 	{
-		damg = 20 + random(dexmod, dexmod * 2);
+		damg = 20 + random(wismod, wismod * 3);
 		if (tome && self.greenmana >= AXE_THROW_COST + AXE_THROW_TOMECOST)
 		{
 			sound (self, CHAN_WEAPON, "paladin/axgenpr.wav", 1, ATTN_NORM);
@@ -182,12 +182,8 @@ void(float rightclick, float tome) axeblade_fire =
 			self.greenmana -= AXE_THROW_COST;
 		}
 		
-		FireMelee (dexmod,dexmod,64);			
 	}
-	else
-	{
-		FireMelee (strmod, strmod * 1.5 ,64);
-	}
+	FireMelee (strmod * 0.75, strmod * 2 ,64); //keep average around str * 2 but give an upper critical hit
 };
 
 void axe_ready (void)
@@ -223,10 +219,40 @@ void axe_deselect (void)
 		W_SetCurrentAmmo();
 }
 
+void axe_b ()
+{
+	float tome;
+	
+	self.wfs = advanceweaponframe($1stAxe1,$1stAxe25);
+	self.th_weapon = axe_b;
+
+	// These frames are used during selection animation
+	if ((self.weaponframe >= $1stAxe2) && (self.weaponframe <= $1stAxe4))
+		self.weaponframe +=1;
+	else if ((self.weaponframe >= $1stAxe6) && (self.weaponframe <= $1stAxe7))
+		self.weaponframe +=1;
+
+	if (self.weaponframe == $1stAxe15)
+	{
+		sound (self, CHAN_WEAPON, "weapons/vorpswng.wav", 1, ATTN_NORM);
+
+		tome = self.artifact_active & ART_TOMEOFPOWER;
+		
+		axeblade_fire(TRUE, tome);			
+	}
+
+	if (self.wfs == WF_LAST_FRAME)
+		axe_ready();
+	
+	if (tome)
+  		self.attack_finished = time + .7; //normal frames for throw
+	else
+  		self.attack_finished = time + .35;
+}
 
 void axe_a ()
 {
-	float rightclick, tome;
+	float tome;
 	
 	self.wfs = advanceweaponframe($1stAxe1,$1stAxe25);
 	self.th_weapon = axe_a;
@@ -242,25 +268,29 @@ void axe_a ()
 		sound (self, CHAN_WEAPON, "weapons/vorpswng.wav", 1, ATTN_NORM);
 
 		tome = self.artifact_active & ART_TOMEOFPOWER;
-		rightclick = self.button1;
 		
-		axeblade_fire(rightclick, tome);			
+		axeblade_fire(FALSE, tome);			
 	}
 
 	if (self.wfs == WF_LAST_FRAME)
 		axe_ready();
+	
+	//regular melee attacks are fast
+	if (tome)
+  		self.attack_finished = time + .3;
+	else
+  		self.attack_finished = time + .05;
 }
 
 void pal_axe_fire()
 {
-	float tome;
-	tome = self.artifact_active & ART_TOMEOFPOWER;
+	float rightclick;
 	
-	axe_a ();
-
-	if (tome)
-  		self.attack_finished = time + .7;
+	rightclick = self.button1;
+	
+	if (rightclick)
+		axe_b();
 	else
-  		self.attack_finished = time + .35;
+		axe_a();
 }
 

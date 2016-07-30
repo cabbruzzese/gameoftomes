@@ -166,8 +166,12 @@ void remove_artflag ()
 
 void() FreezeTouch=
 {
+	float damg;
+	
 	if(other==self.owner)
 		return;
+	
+	damg = 6 + self.dmg / 4; //starts at 10 (with 16 wis) and increases by 1 at every 4 wis
 
 	starteffect(CE_ICE_HIT,self.origin-self.movedir*8);
     if(other.takedamage&&other.health&&other.frozen<=0&&other.thingtype==THINGTYPE_FLESH)//FIXME: Thingtype_flesh only
@@ -190,11 +194,11 @@ void() FreezeTouch=
 			}
 		}
 		if(other.flags&FL_COLDHEAL)//Had to take out cold heal, so cold resist
-	        T_Damage(other,self,self.owner,3);
+	        T_Damage(other,self,self.owner, damg / 3);
 		else if((other.health<=10||(other.classname=="player"&&other.frozen<=-5&&other.health<200))&&other.solid!=SOLID_BSP&&!other.artifact_active&ART_INVINCIBILITY&&other.thingtype==THINGTYPE_FLESH&&other.health<100)
 			SnowJob(other,self.owner);
 		else
-	        T_Damage(other,self,self.owner,10);
+	        T_Damage(other,self,self.owner, damg);
 		self.think=FreezeDie;
 		thinktime self : 0;
 	}
@@ -216,6 +220,9 @@ void()FireFreeze=
 	float angletotal, theta, sinpos;
 	float spreadsize, basespeed;
 	float halfwave, wavecount;
+	float wismod;
+	
+	wismod = self.wisdom;
 	
 	angletotal = 180;
 	
@@ -270,6 +277,8 @@ void()FireFreeze=
     setmodel (newmis, "models/iceshot1.mdl");
 	newmis.drawflags=MLS_ABSLIGHT;
 	newmis.abslight=0.5;
+	
+	newmis.dmg = wismod;
 
     setsize (newmis, '0 0 0', '0 0 0');
     setorigin (newmis, self.origin+self.proj_ofs + v_forward*8);
@@ -777,7 +786,7 @@ void  icestaff_drain()
 	
 	wismod = self.wisdom;
 	intmod = self.intelligence;
-	damg = wismod / 5;
+	damg = wismod / 7;
 	if (damg < 2)
 		damg = 2;
 	

@@ -348,7 +348,7 @@ void warhammer_fire (string hitdir, vector ofs, float tome)
 			self.goalentity=trace_ent;
 			SpawnPuff (org, '0 0 0', 20,trace_ent);
 	
-			damg = random((strmod / 2), (strmod * 2));
+			damg = random(strmod, strmod * 1.5);
 			org = trace_endpos + (v_forward * -1);
 			if(!MetalHitSound(trace_ent.thingtype))
 				sound (self, CHAN_WEAPON, "weapons/gauntht1.wav", 1, ATTN_NORM);
@@ -367,7 +367,7 @@ void warhammer_fire (string hitdir, vector ofs, float tome)
 			
 			if (self.super_damage)
 			{
-				damg += strmod * 1.5;
+				damg += strmod;
 			}
 
 			if(inertia<100)//don't move anything more than 1000 mass
@@ -528,7 +528,7 @@ void warhammer_a ()
 
 void Cru_Wham_Fire (float rightclick)
 {
-	if(rightclick && self.bluemana >= HAMMER_THROW_COST)
+	if(rightclick && self.bluemana >= HAMMER_THROW_COST && HasSpecialAttackInt(self))
 	{
 		warhammer_throw();
 	}

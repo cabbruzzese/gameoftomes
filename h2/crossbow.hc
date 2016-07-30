@@ -307,9 +307,10 @@ vector dir;
 
 void(float offset, float arrowtype, float vel) FireCB_Bolt =
 {
-	float dexmod, spread;
+	float dexmod, wismod, spread;
 	
-	dexmod = 12 + (self.dexterity / 3); //scale down dex damage contribution by 66%
+	wismod = 12 + (self.wisdom / 3);
+	dexmod = 12 + (self.dexterity / 3);
 	spread = 50;
 	
 	local entity missile;
@@ -328,14 +329,14 @@ void(float offset, float arrowtype, float vel) FireCB_Bolt =
 	
 	if (arrowtype == 0)
 	{
-		missile.dmg = random(dexmod, dexmod * 2);
+		missile.dmg = random(wismod, wismod * 2);
 		missile.classname="bolt";
 		setmodel(missile,"models/arrow.mdl");
 		missile.touch=CB_BoltHit;
 	}
 	else if (arrowtype == 1)
 	{
-		missile.dmg = random(dexmod * 0.5, dexmod * 1.5); //stunted damage for green arrows
+		missile.dmg = random(wismod * 0.5, wismod * 1.5); //stunted damage for green arrows
 		setmodel(missile,"models/akarrow.mdl");
 		missile.skin = 0;
 		missile.classname = "green_arrow";

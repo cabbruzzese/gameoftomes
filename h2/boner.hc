@@ -212,14 +212,21 @@ void bone_removeshrapnel (void)
 
 void fire_bone_shrapnel ()
 {
-vector shard_vel;
+	vector shard_vel;
+	float intmod;
+	
+	if (self.owner.classname == "player")
+		intmod = self.owner.intelligence;
+	else
+		intmod = 12;
+	
 	newmis=spawn();
 	newmis.owner=self.owner;
 	newmis.movetype=MOVETYPE_BOUNCE;
 	newmis.solid=SOLID_PHASE;
 	newmis.effects (+) EF_NODRAW;
 	newmis.touch=bone_shard_touch;
-	newmis.dmg=6;
+	newmis.dmg= intmod / 2;
 	newmis.think=bone_removeshrapnel;
 	thinktime newmis : 3;
 
@@ -245,7 +252,7 @@ vector shard_vel;
 
 void bone_shatter ()
 {
-float shard_count;
+	float shard_count;
 	shard_count=20;
 	while(shard_count)
 	{
@@ -328,7 +335,7 @@ void bone_smoke ()
 
 void bone_fire(float powered_up, vector ofs)
 {
-	float intmod;
+	float intmod, wismod;
 	float tome;
 	
 	//SOUND
@@ -346,16 +353,17 @@ void bone_fire(float powered_up, vector ofs)
 	
 	tome = self.artifact_active & ART_TOMEOFPOWER;
 	intmod = self.intelligence;
+	wismod = self.wisdom;
 
 	if(powered_up)
 	{
 		self.punchangle_x=-2;
 		sound(self,CHAN_WEAPON,"necro/bonefpow.wav",1,ATTN_NORM);
 		self.attack_finished=time + 1;
-		newmis.dmg=intmod * 2;
+		newmis.dmg=wismod * 3;
 		
 		if (tome)
-			newmis.dmg = random(intmod * 2, intmod * 4);
+			newmis.dmg = random(wismod * 2, wismod * 4);
 		
 		newmis.frags=TRUE;
 		newmis.touch=bone_power_touch;
@@ -398,7 +406,7 @@ vector dir;
 
 void bone_fire_once()
 {
-vector ofs;
+	vector ofs;
 	ofs_z=random(-5,5);
 	ofs_x=random(-5,5);
 	ofs_y=random(-5,5);
@@ -419,19 +427,19 @@ void raise_dead_think()
 	//get intelligence value and reset count
 	intmod = self.cnt;
 	newmis.cnt = 0;
-	if (intmod > 48)
+	if (intmod > 40)
 	{
 		monster_mummy();
 	}
-	else if (intmod > 40)
+	else if (intmod > 33)
 	{
 		monster_scorpion_black ();
 	}
-	else if (intmod > 32)
+	else if (intmod > 27)
 	{
 		monster_spider_red_large();
 	}
-	else if (intmod > 24)
+	else if (intmod > 21)
 	{
 		monster_scorpion_yellow();
 	}
@@ -555,6 +563,20 @@ relax to ready(Fire delay?  or automatic if see someone?)
 void()boneshard_ready;
 void() Nec_Bon_Attack;
 
+void raisedead_fire (void)
+{
+	self.wfs = advanceweaponframe($fire1,$fire12);
+	
+	self.th_weapon=raisedead_fire;
+	self.last_attack=time;
+	if(self.weaponframe==$fire3)
+	{
+		bone_raise_dead();
+	}
+
+	if (self.wfs == WF_LAST_FRAME)
+		boneshard_ready();
+}
 
 void boneshard_fire (void)
 {
@@ -564,11 +586,7 @@ void boneshard_fire (void)
 	self.last_attack=time;
 	if(self.weaponframe==$fire3)
 	{
-		if(self.button1 && self.greenmana >= RAISE_DEAD_COST)
-		{
-			bone_raise_dead();
-		}
-		else if (self.greenmana >= BONE_ATTACK_COST)
+		if (self.greenmana >= BONE_ATTACK_COST)
 		{
 			bone_fire(TRUE,'0 0 0');			
 		}
@@ -580,7 +598,14 @@ void boneshard_fire (void)
 
 void() Nec_Bon_Attack =
 {
-	boneshard_fire();
+	float rightclick;
+	
+	rightclick = self.button1;
+	
+	if(rightclick && self.greenmana >= RAISE_DEAD_COST)
+		raisedead_fire();
+	else
+		boneshard_fire();
 
 	thinktime self : 0;
 };

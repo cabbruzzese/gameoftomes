@@ -137,7 +137,7 @@ void fire_punchdagger ()
 		}
 
 		damg = random(damage_mod + damage_base,damage_base);
-		damg += strmod / 4;
+		damg += strmod / 3;
 		SpawnPuff (org, '0 0 0', damg,trace_ent);
 		T_Damage (trace_ent, self, self, damg);
 
@@ -271,6 +271,5 @@ void punchdagger_deselect (void)
 	self.wfs = advanceweaponframe($f1,$f8);
 	if(self.wfs==WF_CYCLE_WRAPPED)
 		W_SetCurrentAmmo();
-
 }
 

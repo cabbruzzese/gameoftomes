@@ -40,7 +40,6 @@ $frame 3rdSwd22     3rdSwd23     3rdSwd24
 $frame 6thSwd13     6thSwd14     6thSwd15     
 $frame 6thSwd16     6thSwd17
 
-
 float VORP_BASE_DAMAGE			= 15;
 float VORP_ADD_DAMAGE			= 10;
 float VORP_PWR_BASE_DAMAGE		= 50;
@@ -52,6 +51,7 @@ float VORP_TOME_EXTRACOST = 2;
 
 float VORP_PUSH					= 5;
 
+float HasSpecialAttackInt(entity ent);
 
 void missile_gone(void)
 {
@@ -384,8 +384,6 @@ void vorpal_melee (float tome)
 	float damg;
 	float no_flash,inertia;
 	float strmod, wismod;
-	float tomefwd;
-	tomefwd = tome + 0;
 	
 	strmod = self.strength;
 	wismod = self.wisdom;
@@ -424,7 +422,7 @@ void vorpal_melee (float tome)
 			inertia=trace_ent.mass/10;
 
 		no_flash = 0;
-		if ((self.bluemana >= 4) && (tomefwd)) // Tome of power melee damage
+		if ((self.bluemana >= 4) && (tome)) // Tome of power melee damage
 		{
 			damg = 40 + random(30 + wismod);
 			damg += damg * .25;
@@ -524,13 +522,11 @@ void vorpal_normal_fire (float tome)
 	entity  victim;
 	float damg,damage_flg;
 	float strmod, wismod;
-	float tomefwd;
-	tomefwd = tome + 0;
 	
 	strmod = self.strength;
 	wismod = self.wisdom;
 
-	vorpal_melee (tomefwd);
+	vorpal_melee (tome);
 
 	if (self.bluemana<2)   // Not enough mana to fire it
 		return;
@@ -555,7 +551,7 @@ void vorpal_normal_fire (float tome)
 				damg = VORP_BASE_DAMAGE + random(VORP_ADD_DAMAGE + (strmod / 2));
 				
 				//add damage for tome
-				if (tomefwd)
+				if (tome)
 				{
 					damg = damg * 1.5;
 				}
@@ -578,23 +574,20 @@ Fire Vorpal sword in Power Up mode
 */
 void vorpal_tome_fire (float tome)
 {
-	float tomefwd;	
-	tomefwd = tome + 0;
-
-	vorpal_melee (tomefwd);
+	vorpal_melee (tome);
 	
 	if (self.bluemana >= VORP_THROW_COST)
 	{
 		self.bluemana -= VORP_THROW_COST;
 		
-		if (tomefwd && self.bluemana >= VORP_TOME_EXTRACOST)
+		if (tome && self.bluemana >= VORP_TOME_EXTRACOST)
 		{
 			launch_vorpal_missile(TRUE);
 			self.bluemana -= VORP_TOME_EXTRACOST;
 		}
 		else
 		{
-			launch_vorpal_missile(FALSE);
+			launch_vorpal_missile(FALSE); //if out of mana for tome, treat as normal throw
 		}
 	}
 }
@@ -610,7 +603,7 @@ void vorpal_fire (float rightclick)
 
 	tome = self.artifact_active & ART_TOMEOFPOWER;
 
-	if (rightclick)
+	if (rightclick && HasSpecialAttackInt(self))
 		vorpal_tome_fire(tome);
 	else
 		vorpal_normal_fire(tome);
@@ -704,7 +697,7 @@ void vorpal_a ()
 	
 	if (self.weaponframe == $3rdSwd2)	// Frame 80
 	{
-		if (rightclick)
+		if (rightclick && self.bluemana >= VORP_THROW_COST && HasSpecialAttackInt(self))
 			sound (self, CHAN_WEAPON, "weapons/vorppwr.wav", 1, ATTN_NORM);
 		else
 			sound (self, CHAN_WEAPON, "weapons/vorpswng.wav", 1, ATTN_NORM);

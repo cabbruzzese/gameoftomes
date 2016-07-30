@@ -62,7 +62,7 @@ $frame select6      select7
 
 float MMIS_COST = 2;
 float MMIS_TOME_COST = 8;
-float MMIS_SHOCK_COST = 5;
+float MMIS_SHOCK_COST = 4;
 
 void chain_remove ()
 {
@@ -86,7 +86,7 @@ void MagicMissileTouch (void)
 	if(other.takedamage)
 		T_Damage(other,self,self.owner,self.dmg);
 
-	T_RadiusDamage(self,self.owner,self.dmg,other);
+	T_RadiusDamage(self,self.owner,self.dmg / 2,other);
 	sound(self,CHAN_AUTO,"weapons/explode.wav",1,ATTN_NORM);
 	starteffect(CE_MAGIC_MISSILE_EXPLOSION,self.origin-self.movedir*8,0.05);
 	remove(self);
@@ -368,7 +368,7 @@ void  mmis_power()
 	
 	wismod = self.wisdom;
 	intmod = self.intelligence;
-	damg = 20 + random(0, wismod);
+	damg = 20 + random(wismod);
 
 	tome = self.artifact_active&ART_TOMEOFPOWER;
 	if (tome)
@@ -428,6 +428,35 @@ relax to ready(Fire delay?  or automatic if see someone?)
 void()magicmis_ready;
 void() Nec_Mis_Attack;
 
+void magicmis_shock_fire (void)
+{
+	float tome, cost;
+	
+	tome = self.artifact_active&ART_TOMEOFPOWER;
+	
+	if(self.button0&&self.weaponframe==$mfire5 &&!self.artifact_active&ART_TOMEOFPOWER)
+		self.weaponframe=$mfire5;
+	else
+		self.wfs = advanceweaponframe($mfire1,$mfire8);
+	self.th_weapon=magicmis_shock_fire;
+	self.last_attack=time;
+
+	cost = MMIS_COST;
+	if (tome)
+	{
+		cost = MMIS_TOME_COST;
+	}
+	
+	if(self.wfs==WF_CYCLE_WRAPPED||self.bluemana<cost)
+	{
+		magicmis_ready();		
+	}
+	else if(self.weaponframe==$mfire5)
+	{
+		mmis_power();
+	}
+}
+
 void magicmis_fire (void)
 {
 	float tome, cost;
@@ -453,16 +482,20 @@ void magicmis_fire (void)
 	}
 	else if(self.weaponframe==$mfire5)
 	{
-		if (self.button1 && self.bluemana >= MMIS_SHOCK_COST)
-			mmis_power();
-		else
-			mmis_normal();
+		mmis_normal();
 	}
 }
 
 void() Nec_Mis_Attack =
 {
-	magicmis_fire();
+	float rightclick;
+	
+	rightclick = self.button1;
+	
+	if (self.button1 && self.bluemana >= MMIS_SHOCK_COST)
+		magicmis_shock_fire();
+	else
+		magicmis_fire();
 
 	thinktime self : 0;
 };
