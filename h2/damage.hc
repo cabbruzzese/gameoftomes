@@ -385,6 +385,55 @@ float armor_inv(entity victim)
 	return(armor_cnt);
 }
 
+float AC_TOTAL_MAX = 20;
+float DEX_MOD_MAX = 35;
+float DEX_MOD_MIN = 15;
+float GetNaturalArmorClass(entity targ)
+{
+	float dexmod, armorpercent, acvalue;
+	
+	acvalue = 0;
+	
+	//All characters have natural protection
+	if (targ.classname == "player")
+	{
+		//perfect protection = 20
+		//best natural armor = 16
+		//Only best armor at 115 dex (scale starts at 15)
+		dexmod = targ.dexterity - DEX_MOD_MIN;
+		
+		if (dexmod >= DEX_MOD_MAX)
+		{
+			acvalue = AC_TOTAL_MAX;
+		}
+		else if (dexmod <= 0)
+		{
+			acvalue = 0;
+		}
+		else
+		{
+			armorpercent = dexmod / DEX_MOD_MAX;
+			acvalue = armorpercent * AC_TOTAL_MAX;
+		}
+	}
+	
+	return acvalue;
+}
+
+void ApplyNaturalArmor(entity targ)
+{
+	float natac;
+	if (targ.classname == "player")
+	{
+		natac = GetNaturalArmorClass(targ);
+		//reapply natural armor if needed
+		if (natac > 0 && targ.armor_breastplate < natac)
+		{
+			targ.armor_breastplate = natac;
+		}
+	}
+}
+
 float armor_calc(entity targ,float damage)
 {
 	float total_armor_protection;
@@ -408,13 +457,14 @@ float armor_calc(entity targ,float damage)
 		total_armor_protection += ClassArmorProtection[targ.playerclass - 1 + 3];
 
 	total_armor_protection += targ.level * .001;
+	
 
 	armor_cnt = armor_inv(targ);
-
+	
 	if (armor_cnt) // There is armor
 	{
 		armor_damage = total_armor_protection * damage;
-
+		
 		// Damage is greater than all the armor
 		if (armor_damage > (targ.armor_amulet + targ.armor_bracer + 
 				targ.armor_breastplate + targ.armor_helmet))
@@ -427,74 +477,71 @@ float armor_calc(entity targ,float damage)
 		else			// Damage the armor
 		{
 			curr_damage = armor_damage;
-			// FIXME: Commented out the loop for E3 because of a runaway loop message
-		//	while (curr_damage>0)
-		//	{
-				armor_cnt = armor_inv(targ);
+			armor_cnt = armor_inv(targ);
 
-				perpiece = curr_damage / armor_cnt;
+			perpiece = curr_damage / armor_cnt;
 
-				if ((targ.armor_amulet) && (curr_damage))
+			if ((targ.armor_amulet) && (curr_damage))
+			{
+				targ.armor_amulet -= perpiece;	
+				curr_damage -= perpiece;
+				if (targ.armor_amulet < 0)
 				{
-					targ.armor_amulet -= perpiece;	
-					curr_damage -= perpiece;
-					if (targ.armor_amulet < 0)
-					{
-						curr_damage -= targ.armor_amulet;
-						targ.armor_amulet = 0;
-					}	
-
-					if (targ.armor_amulet < 1)
-						targ.armor_amulet = 0;
-				}				
-
-				if ((targ.armor_bracer) && (curr_damage))
-				{
-					targ.armor_bracer -= perpiece;	
-					curr_damage -= perpiece;
-					if (targ.armor_bracer < 0)
-					{
-						curr_damage -= targ.armor_bracer;
-						targ.armor_bracer = 0;
-					}	
-					
-					if (targ.armor_bracer < 1)
-						targ.armor_bracer = 0;
-				}				
-
-				if ((targ.armor_breastplate) && (curr_damage))
-				{
-					targ.armor_breastplate -= perpiece;	
-					curr_damage -= perpiece;
-					if (targ.armor_breastplate < 0)
-					{
-						curr_damage -= targ.armor_breastplate;
-						targ.armor_breastplate = 0;
-					}	
-					
-					if (targ.armor_breastplate < 1)
-						targ.armor_breastplate = 0;
-				}				
-
-				if ((targ.armor_helmet) && (curr_damage))
-				{
-					targ.armor_helmet -= perpiece;	
-					curr_damage -= perpiece;
-					if (targ.armor_helmet < 0)
-					{
-						curr_damage -= targ.armor_helmet;
-						targ.armor_helmet = 0;
-					}	
-
-					if (targ.armor_helmet < 1)
-						targ.armor_helmet = 0;
+					curr_damage -= targ.armor_amulet;
+					targ.armor_amulet = 0;
 				}	
 
-		//	}
+				if (targ.armor_amulet < 1)
+					targ.armor_amulet = 0;
+			}				
+
+			if ((targ.armor_bracer) && (curr_damage))
+			{
+				targ.armor_bracer -= perpiece;	
+				curr_damage -= perpiece;
+				if (targ.armor_bracer < 0)
+				{
+					curr_damage -= targ.armor_bracer;
+					targ.armor_bracer = 0;
+				}	
+				
+				if (targ.armor_bracer < 1)
+					targ.armor_bracer = 0;
+			}				
+
+			if ((targ.armor_breastplate) && (curr_damage))
+			{
+				targ.armor_breastplate -= perpiece;	
+				curr_damage -= perpiece;
+				if (targ.armor_breastplate < 0)
+				{
+					curr_damage -= targ.armor_breastplate;
+					targ.armor_breastplate = 0;
+				}	
+				
+				if (targ.armor_breastplate < 1)
+					targ.armor_breastplate = 0;
+			}				
+
+			if ((targ.armor_helmet) && (curr_damage))
+			{
+				targ.armor_helmet -= perpiece;	
+				curr_damage -= perpiece;
+				if (targ.armor_helmet < 0)
+				{
+					curr_damage -= targ.armor_helmet;
+					targ.armor_helmet = 0;
+				}	
+
+				if (targ.armor_helmet < 1)
+					targ.armor_helmet = 0;
+			}
 		}
 	}
 	else
 		armor_damage =0;
+
+	ApplyNaturalArmor(targ);
 
 	return(armor_damage);
 }

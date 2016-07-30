@@ -326,6 +326,9 @@ void PlayerAdvanceLevel(float NewLevel)
 
 	if (self.level >5)
 		self.flags(+)FL_SPECIAL_ABILITY2;
+	
+	//reset armor
+	ApplyNaturalArmor(self);
 }
 
 float FindLevel(entity WhichPlayer)
@@ -536,5 +539,8 @@ void drop_level (entity loser,float number)
 
 	if (loser.level <=5)
 		loser.flags(-)FL_SPECIAL_ABILITY2;
+	
+	//reset armor
+	ApplyNaturalArmor(self);
 }
 

@@ -785,6 +785,9 @@ entity spot;
 
 	self.button0 = self.button1 = self.button2 = 0;
 	self.attack_finished=time+0.5;//so no respawn fire
+	
+	//reset armor
+	ApplyNaturalArmor(self);
 
 //	self.th_stand();
 	player_frames();
@@ -910,6 +913,9 @@ entity spot;
 	W_SetCurrentAmmo ();
 
 	force_retouch = 2;		// make sure even still objects get hit
+	
+	//reset armor
+	ApplyNaturalArmor(self);
 
 	self.think=player_frames;
 	thinktime self : 0;
@@ -1606,6 +1612,8 @@ void() PlayerPreThink =
 			W_SetCurrentWeapon ();
 		}
 	}
+	
+	//ApplyNaturalArmor(self);
 };
 
 void CheckRings (void)
