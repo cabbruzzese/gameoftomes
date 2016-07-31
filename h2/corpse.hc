@@ -194,6 +194,9 @@ void MarkForRespawn (void)
 	
 		newmis.think = wandering_monster_respawn;
 		newmis.nextthink = time + timelimit;
+		
+		//mark for respawn buff chance
+		newmis.killerlevel = self.killerlevel;
 	}
 	remove(self);
 }
@@ -300,6 +303,11 @@ vector newmaxs;
 		self.lifetime = time + random(10,20); // disappear after 20 seconds
 		self.think=CorpseThink;
 		thinktime self : 0;
+	}
+	
+	if (self.bufftype & BUFFTYPE_LEADER)
+	{
+		self.effects (-) EF_TORCHLIGHT;
 	}
 };
 

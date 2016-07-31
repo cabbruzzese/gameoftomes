@@ -879,6 +879,8 @@ void() monster_fallen_angel =
 	}
 	
 	init_fangel();
+	
+	ApplyMonsterBuff(self, FALSE);
 };
 
 /*QUAKED monster_fallen_angel_lord (1 0.3 0) (-14 -14 -41) (14 14 23) AMBUSH STUCK JUMP PLAY_DEAD DORMANT

@@ -613,9 +613,43 @@ float() FacingIdeal =
 
 
 //=============================================================================
+void UseBlast (void);
+void LeaderRepulse (void)
+{
+	entity findmissile;
+	float useblast;
+	
+	useblast = FALSE;
+	
+	//find a player blast within a certain range
+	findmissile = findradius(self.origin, BLAST_RADIUS);
+	while(findmissile)
+	{
+		if (findmissile.movetype == MOVETYPE_FLYMISSILE && findmissile.owner.classname == "player")
+		{
+			useblast = TRUE;
+		}
+		
+		findmissile = findmissile.chain;
+	}
+	
+	if (useblast)
+	{
+		UseBlast();
+	}
+}
 
 float() CheckAnyAttack =
 {
+	//leaders can deflect attacks
+	if (self.bufftype & BUFFTYPE_LEADER)
+	{
+		if (random(5) > 1)
+		{
+			LeaderRepulse();
+		}
+	}
+	
 	if (self.model=="models/medusa.mdl"||self.model=="models/medusa2.mdl")
 			return(MedusaCheckAttack ());
 

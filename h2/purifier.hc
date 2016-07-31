@@ -46,8 +46,179 @@ $frame select11     select12
 
 //==================================================================
 
+float PFLAME_COST = 5;
 
 void purifier_ready (void);
+
+void pshot_gone(void)
+{
+	float damg;
+
+	if (other.health)
+	{
+		damg = 30 + random(30);
+		T_Damage (other, self, self.owner, damg);
+	}
+
+	remove(self);
+}
+
+void pflame1_runup (void) [++ 0 .. 16 ]
+{
+	if (cycle_wrapped)
+		if(self.cnt)
+		{
+			self.cnt-=1;
+			particle2(self.origin+'0 0 17','0 0 25','0 0 25',168,7,5);
+		}
+		else
+			remove(self);
+}
+
+void pflame2_runup (void) [++ 17 .. 33 ]
+{
+	if (cycle_wrapped)
+		if(self.cnt)
+		{
+			self.cnt-=1;
+			particle2(self.origin+'0 0 17','0 0 25','0 0 25',168,7,5);
+		}
+		else
+			remove(self);
+}
+
+void pflame3_runup (void) [++ 34 .. 50 ]
+{
+	if (cycle_wrapped)
+		if(self.cnt)
+		{
+			self.cnt-=1;
+			particle2(self.origin+'0 0 17','0 0 25','0 0 25',168,7,5);
+		}
+		else
+			remove(self);
+}
+
+void pflame_burn(void)
+{
+	float damg;
+
+	if ((other.health) && (other != self.owner) && (self.pain_finished<time))
+	{
+		damg = self.dmg + random() * self.dmg;
+		T_Damage (other, self, self.owner, damg);
+		self.pain_finished = time + .05;
+		if(self.t_width<time)
+		{
+			sound(self,CHAN_BODY,"crusader/sunhit.wav",1,ATTN_NORM);
+			self.t_width=time+0.1;
+		}
+	}
+}
+
+
+void SpawnPFlame(void)
+{
+	entity new;
+	float chance;
+
+	traceline(self.origin,self.origin - '0 0 600',TRUE,self);
+
+	if (trace_fraction==1)
+		return;
+
+	if(pointcontents(trace_endpos)==CONTENT_WATER)
+	{
+		remove(self);
+		return;
+	}
+
+	new = spawn();
+
+	CreateEntityNew(new,ENT_MUMMY_FIRE,"models/mumshot.mdl",SUB_Null);
+
+	setorigin(new, trace_endpos);
+	new.owner = self.owner;
+	new.pain_finished = 0;
+	new.drawflags=MLS_ABSLIGHT;
+	new.abslight=0.5;
+	new.angles = self.angles;
+	new.dmg=6;
+	
+	chance = random();
+	if (chance < .33)
+		new.think = pflame1_runup;
+	else if (chance < .66)
+		new.think = pflame2_runup;
+	else
+		new.think = pflame3_runup;
+
+	thinktime new : HX_FRAME_TIME;
+
+	new.touch = pflame_burn;
+
+	if(self.classname=="circfire")
+	{
+		new.angles = self.angles +'0 -90 0';
+		new.scale=2.5;
+		new.cnt=10;
+		particle2(new.origin+'0 0 17','0 0 25','0 0 25',168,7,5);
+	}
+	else if (self.lifetime < time)
+	{
+		remove(self);
+	}
+	else
+	{
+		particle2(new.origin,'0 0 25','0 0 25',168,7,5);
+
+	//	self.nextthink = time + .04;
+		thinktime self : .04;
+
+		self.think = SpawnPFlame;
+	}
+}
+
+void launch_pflame ()
+{
+	vector dir;
+	
+	self.last_attack=time;
+
+	newmis = spawn ();
+	newmis.owner = self;
+	newmis.movetype = MOVETYPE_FLYMISSILE;
+	newmis.solid = SOLID_BBOX;
+
+	setmodel (newmis,"models/mumshot.mdl");
+	setsize (newmis, '0 0 0', '0 0 0');
+	makevectors (self.angles);
+	setorigin (newmis, self.origin);
+
+	dir = v_forward;
+	dir_z = 0;
+	
+	newmis.velocity = normalize(dir);
+	newmis.velocity = newmis.velocity * 400;
+	newmis.classname = "mumshot";
+	newmis.angles = vectoangles(newmis.velocity);
+
+	newmis.touch = pshot_gone;
+
+	CreateRedFlash(self.origin + v_forward*-14 + v_right * 15 + v_up * 50);
+
+	newmis.effects = EF_NODRAW;
+	sound (self, CHAN_WEAPON, "mummy/mislfire.wav", 1, ATTN_NORM);
+
+	newmis.lifetime = time + 2.5;
+
+// set missile duration
+//	newmis.nextthink = time + .04;
+	thinktime newmis : .04;
+
+	newmis.think = SpawnPFlame;
+
+}
 
 void pmissile_gone(void)
 {
@@ -55,7 +226,6 @@ void pmissile_gone(void)
 	sound (self, CHAN_WEAPON, "misc/null.wav", 1, ATTN_NORM);
 	remove(self);
 }
-
 
 /*
 ============
@@ -248,6 +418,22 @@ void launch_pmissile2 (void)
 
 }
 
+void purifier_flamefire (void)
+{
+	self.wfs = advanceweaponframe($bigshot1,$bigshot9);
+	self.th_weapon=purifier_flamefire;
+	if(self.weaponframe==$bigshot2)
+	{
+		self.punchangle_x= -4;
+		launch_pflame();
+		self.attack_finished = time + 0.65;
+		
+		self.greenmana -= PFLAME_COST;
+		self.bluemana -= PFLAME_COST;
+	}
+	else if(self.wfs==WF_CYCLE_WRAPPED)
+			purifier_ready();
+}
 
 /*
 ============
@@ -331,7 +517,7 @@ void purifier_rapidfire2R (void)
 	if (self.weaponframe == $2Rshot3)
 		self.punchangle_x= random(-3);
 
-	if (self.attack_finished <= time&&self.button0)
+	if (self.attack_finished <= time&&(self.button0 || self.button1))
 		launch_pmissile1();
 
 	if (self.wfs==WF_CYCLE_WRAPPED)
@@ -346,7 +532,7 @@ void purifier_rapidfire2L (void)
 	if (self.weaponframe == $1Lshot3)
 		self.punchangle_x= random(-3);
 
-	if (self.attack_finished <= time&&self.button0)
+	if (self.attack_finished <= time&&(self.button0 || self.button1))
 		launch_pmissile1();
 
 	if (self.wfs==WF_CYCLE_WRAPPED)
@@ -361,7 +547,7 @@ void purifier_rapidfire1R (void)
 	if (self.weaponframe == $1Rshot3)
 		self.punchangle_x= random(-3);
 
-	if (self.attack_finished <= time&&self.button0)
+	if (self.attack_finished <= time&&(self.button0 || self.button1))
 		launch_pmissile1();
 
 	if (self.wfs==WF_CYCLE_WRAPPED)
@@ -376,7 +562,7 @@ void purifier_rapidfire1L (void)
 	if (self.weaponframe == $1Lshot3)
 		self.punchangle_x= random(-3);
 
-	if (self.attack_finished <= time&&self.button0)
+	if (self.attack_finished <= time&&(self.button0 || self.button1))
 		launch_pmissile1();
 
 	if (self.wfs==WF_CYCLE_WRAPPED)
@@ -417,6 +603,8 @@ void() pal_purifier_fire =
 	if ((self.artifact_active & ART_TOMEOFPOWER) &&
 		(self.greenmana >= 8) && (self.bluemana >= 8))
 		purifier_tomefire();
+	else if (self.button1 && self.greenmana >= PFLAME_COST && self.bluemana >= PFLAME_COST)
+		purifier_flamefire();
 	else if ((self.greenmana >= 2) && (self.bluemana >= 2))
 		purifier_rapidfire();
 

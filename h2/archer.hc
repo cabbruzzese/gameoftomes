@@ -389,7 +389,7 @@ vector spot1, spot2;
 	if (self.frame == $fire2)	// FIRE!!!!
 	{
 		makevectors(self.angles);	
-		spot1 = self.origin + v_forward*4 + v_right * 10 + v_up * 36;
+		spot1 = self.origin + v_forward*(4 * self.scale) + v_right * (10 * self.scale) + v_up * (36 * self.scale);
 		if(self.classname=="monster_archer_lord")
 		{
 			tspeed=vlen(self.enemy.velocity);
@@ -738,8 +738,10 @@ void monster_archer ()
 	self.flags (+) FL_MONSTER;
 	self.yaw_speed = 10;
 	self.view_ofs = '0 0 40';
-
+	
 	walkmonster_start();
+	
+	ApplyMonsterBuff(self, TRUE);
 }
 
 /*QUAKED monster_archer_lord (1 0.3 0) (-16 -16 0) (16 16 50) AMBUSH STUCK JUMP PLAY_DEAD DORMANT

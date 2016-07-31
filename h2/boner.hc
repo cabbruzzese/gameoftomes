@@ -360,7 +360,7 @@ void bone_fire(float powered_up, vector ofs)
 		self.punchangle_x=-2;
 		sound(self,CHAN_WEAPON,"necro/bonefpow.wav",1,ATTN_NORM);
 		self.attack_finished=time + 1;
-		newmis.dmg=wismod * 3;
+		newmis.dmg=random(wismod, wismod * 3);
 		
 		if (tome)
 			newmis.dmg = random(wismod * 2, wismod * 4);

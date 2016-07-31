@@ -334,3 +334,151 @@ void() swimmonster_start =
 };
 */
 
+//Make monster larger and stronger
+void ApplyLargeMonster(entity monst)
+{
+	entity oself;
+	float sizescale;
+	float oldheight, newheight;
+	vector newmins, newmaxs, newoffs1, newoffs2;
+
+	oself = self; //swap self for scope
+	self = monst;
+		
+	sizescale = random(1.2, 1.8); 
+	self.scale = self.scale * sizescale;
+	
+	newmins = self.mins * sizescale;
+	newmaxs = self.maxs * sizescale;
+
+	oldheight = fabs(self.mins_y) + self.maxs_y;
+	newheight = fabs(newmins_y) + newmaxs_y;
+	
+	newoffs1 = self.view_ofs * sizescale;
+	newoffs2 = self.proj_ofs * sizescale;
+	
+	/*
+	dprintv("Mins: %s - ", self.mins);
+	dprintv("%s | Maxs: ", newmins);
+	dprintv("%s - ", self.maxs);
+	dprintv("%s | View Ofs: ", newmaxs);
+	dprintv("%s - ", self.view_ofs);
+	dprintv("%s | Proj Ofs: ", newoffs1);
+	dprintv("%s - ", self.proj_ofs);
+	dprintv("%s \n", newoffs2);
+	*/
+	
+	if (self.movetype == MOVETYPE_FLY)
+		self.drawflags(+)SCALE_ORIGIN_CENTER;
+	else
+		self.drawflags(+)SCALE_ORIGIN_BOTTOM;
+	
+	self.scale=sizescale;
+	setsize (monst, newmins, newmaxs);
+	self.view_ofs = newoffs1;
+	self.proj_ofs = newoffs2;
+	
+	self.speed *= sizescale;
+	
+	self.max_health *= sizescale;
+	self.health *= sizescale;
+	self.experience_value *= sizescale;
+	
+	//no less than henchman	
+	if (self.monsterclass < CLASS_HENCHMAN)
+		self.monsterclass = CLASS_HENCHMAN;
+	
+	self = oself; //restore scope
+}
+
+void ApplyLeaderMonster(entity monst)
+{
+	entity oself;
+	
+	oself = self;
+	self = monst;
+	
+	self.health *= 1.5;
+	self.effects(+)EF_TORCHLIGHT;
+	
+	if (self.movetype == MOVETYPE_FLY)
+		self.drawflags(+)SCALE_ORIGIN_CENTER;
+	else
+		self.drawflags(+)SCALE_ORIGIN_BOTTOM;
+	self.scale = 1.25;
+	
+	//spawn helpers
+	cube_of_force(self);
+	if (random(2) < 1)
+	{
+		cube_of_force(self);		
+	}
+	
+	if (self.monsterclass < CLASS_LEADER)
+		self.monsterclass = CLASS_LEADER;
+
+	
+	self = oself;
+}
+
+//make monster invisible and fast
+void ApplySpectreMonster(entity monst)
+{
+	entity oself;
+	
+	oself = self;
+	self = monst;
+		
+	self.drawflags(+)DRF_TRANSLUCENT|MLS_ABSLIGHT;
+	self.speed *= 1.75;
+	self.experience_value *= 1.5;
+	
+	self = oself; //restore scope
+}
+
+float BUFF_RANDMIN_MIN = 0;
+float BUFF_RANDMIN_MAX = 30;
+float BUFF_LARGE_THRESHHOLD = 83; //17% chance
+float BUFF_LEADER_THRESHHOLD = 95;
+float BUFF_SPECTRE_THRESHHOLD = 91;
+void ApplyMonsterBuff(entity monst, float canBeLeader)
+{
+	float randmin, randmax, randval;
+	randmax = 100;
+	
+	monst.bufftype = BUFFTYPE_NORMAL;
+	
+	//respawn monsters have higher chance of becoming special.
+	//  by increasing the min, the total spread reduces leaving the special monsters intact;
+	randmin = monst.killerlevel;
+	
+	//clamp value
+	if (randmin < BUFF_RANDMIN_MIN)
+		randmin = BUFF_RANDMIN_MIN;
+	if (randmin > BUFF_RANDMIN_MAX)
+		randmin = BUFF_RANDMIN_MAX;
+	
+	randval = random(randmin, randmax);
+	if (randmin >= BUFF_LARGE_THRESHHOLD)
+	{
+		ApplyLargeMonster(monst);
+		monst.bufftype (+) BUFFTYPE_LARGE;
+	}
+	
+	//make second check. There is a small chance that a monster can be a large leader!
+	randval = random(randmin, randmax);
+	if (canBeLeader && randval >= BUFF_LEADER_THRESHHOLD)
+	{
+		ApplyLeaderMonster(monst);
+		monst.bufftype (+) BUFFTYPE_LEADER;
+		
+		return; //cannot be a spectre leader, ditch here
+	}
+	
+	randval = random(randmin, randmax);
+	if (randval >= BUFF_SPECTRE_THRESHHOLD)
+	{
+		ApplySpectreMonster(monst);
+		monst.bufftype (+) BUFFTYPE_SPECTRE;
+	}
+}

@@ -14,13 +14,27 @@ void CubeDie(void)
 float cube_find_target(void)
 {
 	entity item;
+	float targetGood;
 
 	item = findradius(self.origin, cube_distance);
 
 	while (item)
 	{
-		if (((item.flags & FL_MONSTER && item.controller!=self.controller) ||
-		     (item.classname == "player" && deathmatch == 1)) && item.health > 0)
+		targetGood = FALSE;
+		
+		if (deathmatch == 1 && item.classname == "player") //target other players in deathmatch
+			targetGood = TRUE;
+		if (item.owner.classname != "player" && item.classname == "player") //target players if owned by monster
+			targetGood = TRUE;
+		if (item.owner.classname == "player" && item.flags & FL_MONSTER) //target monsters if owned by player
+			targetGood = TRUE;
+		
+		if (item.health <= 0) //Don't shoot dead bodies
+			targetGood = FALSE;
+		if (item.controller.classname == self.classname) //don't shoot our own summons or anything summoned by our friends
+			targetGood = FALSE;
+			
+		if (targetGood)
 		{
 			tracearea (self.origin,item.origin,self.mins,self.maxs,FALSE,self);
 			if (trace_ent == item)
@@ -58,10 +72,16 @@ void cube_fire(void)
 	float Distance;
 	entity temp;
 
-	if (time > self.monster_duration || self.owner.health <= 0 || self.shot_cnt >= 10)
+	if (self.owner.classname == "player" && (time > self.monster_duration || self.shot_cnt >= 10))
 	{
 		CubeDie();
 		return;
+	}
+	
+	if (self.owner.health <= 0)
+	{
+		CubeDie();
+		return;		
 	}
 
 	if (!self.enemy)
@@ -228,22 +248,16 @@ void CubeThinkerB(void)
 	setorigin(self,NewSpot);
 }
 
-void UseCubeOfForce(void)
+void cube_of_force (entity spawner)
 {
 	entity cube;
 
-	if ((self.artifact_flags & AFL_CUBE_LEFT) &&
-		(self.artifact_flags & AFL_CUBE_RIGHT))
-	{  // Already got two running
-		return;
-	}
-
 	cube = spawn();
 
-	cube.owner = self;
-	cube.controller = self;
+	cube.owner = spawner;
+	cube.controller = spawner;
 	cube.solid = SOLID_SLIDEBOX;
-	cube.movetype = MOVETYPE_NOCLIP;//MOVETYPE_FLY;
+	cube.movetype = MOVETYPE_NOCLIP;
 	cube.flags (+) FL_FLY | FL_NOTARGET;
 	setorigin (cube, cube.owner.origin);
 	setmodel (cube, "models/cube.mdl");
@@ -253,14 +267,14 @@ void UseCubeOfForce(void)
 	cube.health = 10;
 	cube.dmg = -1;
 
-	if (self.artifact_flags & AFL_CUBE_LEFT)
+	if (spawner.artifact_flags & AFL_CUBE_LEFT)
 	{
-		self.artifact_flags (+) AFL_CUBE_RIGHT;
+		spawner.artifact_flags (+) AFL_CUBE_RIGHT;
 		cube.artifact_flags (+) AFL_CUBE_RIGHT;
 	}
 	else
 	{
-		self.artifact_flags (+) AFL_CUBE_LEFT;
+		spawner.artifact_flags (+) AFL_CUBE_LEFT;
 		cube.artifact_flags (+) AFL_CUBE_LEFT;
 	}
 	cube.think = CubeThinkerB;
@@ -272,13 +286,23 @@ void UseCubeOfForce(void)
 
 	cube.movedir = '100 100 0';
 	cube.count = random(360);
-	self.movedir_z = random(360);
+	spawner.movedir_z = random(360);
 
-//	cube.drawflags (+) DRF_TRANSLUCENT;
 	cube.drawflags (+) MLS_ABSLIGHT;
 
 	cube.abslight = .1;
+}
 
+void UseCubeOfForce(void)
+{
+	if ((self.artifact_flags & AFL_CUBE_LEFT) &&
+		(self.artifact_flags & AFL_CUBE_RIGHT))
+	{  // Already got two running
+		return;
+	}
+	
+	cube_of_force(self);
+		
 	self.cnt_cubeofforce -= 1;
 }
 

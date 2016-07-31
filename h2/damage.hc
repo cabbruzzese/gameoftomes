@@ -169,8 +169,8 @@ Killed
 */
 void(entity targ, entity attacker, entity inflictor) Killed =
 {
-entity oself;
-float exp_bonus;
+	entity oself;
+	float exp_bonus;
 	oself = self;
 	self = targ;
 
@@ -201,6 +201,8 @@ float exp_bonus;
 			if ((targ.flags & FL_MONSTER) || (targ.flags & FL_CLIENT))
 				crusader_sphere (attacker);
 		}
+		
+		self.killerlevel = attacker.level;
 	}
 
 //Check for decapitation death
@@ -587,6 +589,15 @@ entity holdent;
 
 	if (targ.flags & FL_GODMODE)
 		return;
+	
+	if (attacker.bufftype & BUFFTYPE_SPECTRE)
+	{
+		damage *= 1.5;
+	}
+	else if (attacker.bufftype & BUFFTYPE_LEADER)
+	{
+		damage *= 1.25;
+	}
 
 	if(targ.classname=="monster_mezzoman")
 	{
