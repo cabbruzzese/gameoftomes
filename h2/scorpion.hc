@@ -211,6 +211,8 @@ void ScorpionInit(float type)
 		self.skin = 1;
 	}
 	walkmonster_start();
+	
+	ApplyMonsterBuff(self, FALSE);
 }
 
 //==========================================================================

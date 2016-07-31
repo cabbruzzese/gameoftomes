@@ -936,6 +936,8 @@ void monster_medusa_green (void)
 	self.hull=HULL_PLAYER;
 
 	walkmonster_start();
+	
+	ApplyMonsterBuff(self, TRUE);
 }
 
 void monster_medusa (void)

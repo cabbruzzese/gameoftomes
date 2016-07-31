@@ -164,7 +164,7 @@ void sunstaff_fire_loop ()
 {
 	self.wfs = advanceweaponframe($fircyc1,$fircyc10);
 	self.th_weapon=sunstaff_fire_loop;
-	if(self.attack_finished<=time&&self.button0&&self.greenmana>=2&&self.bluemana>=2)
+	if(self.attack_finished<=time&&(self.button0 || self.button1)&&self.greenmana>=2&&self.bluemana>=2)
 	{
 		if(self.artifact_active&ART_TOMEOFPOWER)
 		{
@@ -182,7 +182,7 @@ void sunstaff_fire_loop ()
 		self.attack_finished=time + 0.05;
 	}
 
-	if(self.wfs==WF_CYCLE_WRAPPED&&(!self.button0||self.greenmana<2||self.bluemana<2))
+	if(self.wfs==WF_CYCLE_WRAPPED&&(!(self.button0 || self.button1)||self.greenmana<2||self.bluemana<2))
 	{
 		self.effects(-)EF_BRIGHTLIGHT;
 		sunstaff_fire_settle();

@@ -809,6 +809,8 @@ void monster_archer_lord ()
 	self.view_ofs = '0 0 40';
 
 	walkmonster_start();
+	
+	ApplyMonsterBuff(self, TRUE);
 }
 
 /*

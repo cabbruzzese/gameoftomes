@@ -304,10 +304,5 @@ vector newmaxs;
 		self.think=CorpseThink;
 		thinktime self : 0;
 	}
-	
-	if (self.bufftype & BUFFTYPE_LEADER)
-	{
-		self.effects (-) EF_TORCHLIGHT;
-	}
 };
 

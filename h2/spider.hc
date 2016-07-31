@@ -351,6 +351,8 @@ void SpiderInit(float type)
 		sdprint("SummonMonsterStart", FALSE);
 		walkmonster_start();		
 	}
+	
+	ApplyMonsterBuff(self, FALSE);
 }
 
 

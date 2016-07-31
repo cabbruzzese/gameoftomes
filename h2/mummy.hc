@@ -953,6 +953,8 @@ void monster_mummy (void)
 	self.health = 200;
 	self.experience_value = 200;
 	walkmonster_start();
+	
+	ApplyMonsterBuff(self, TRUE);
 }
 
 /*QUAKED monster_mummy_lord (1 0.3 0) (-16 -16 0) (16 16 50) AMBUSH STUCK JUMP PLAY_DEAD DORMANT
@@ -1010,5 +1012,7 @@ void monster_mummy_lord (void)
 	self.health = 400;
 	self.experience_value = 300;
 	walkmonster_start();
+	
+	ApplyMonsterBuff(self, TRUE);
 }
 

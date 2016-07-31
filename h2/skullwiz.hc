@@ -1107,6 +1107,8 @@ void monster_skull_wizard (void)
 	self.monsterclass = CLASS_GRUNT;
 
 	walkmonster_start();
+	
+	ApplyMonsterBuff(self, TRUE);
 }
 
 /*QUAKED monster_skull_wizard_lord (1 0.3 0) (-24 -24 0) (24 24 64) AMBUSH
@@ -1132,6 +1134,6 @@ void monster_skull_wizard_lord (void)
 	self.scale = 1.20;
 	walkmonster_start();
 
-
+	ApplyMonsterBuff(self, TRUE);
 }
 

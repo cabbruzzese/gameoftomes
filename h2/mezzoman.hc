@@ -1551,6 +1551,8 @@ void() monster_werejaguar =
 	self.frame=$stand1;
 
 	walkmonster_start();
+	
+	ApplyMonsterBuff(self, TRUE);
 };
 
 void monster_mezzoman (void)
