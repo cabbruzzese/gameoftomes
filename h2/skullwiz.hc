@@ -680,6 +680,11 @@ void skullwiz_blinkin(void)
 		max_scale = 1;
 	else
 		max_scale = 1.20;
+	
+	if (self.bufftype & BUFFTYPE_LARGE)
+	{
+		max_scale = self.tempscale;
+	}
 
 	if (self.scale >= max_scale)
 	{
@@ -695,6 +700,11 @@ void skullwiz_blinkin1 (void)
 {
 	thinktime self : HX_FRAME_TIME;
 	self.think = skullwiz_blinkin;
+	
+	if (self.bufftype & BUFFTYPE_LARGE)
+	{
+		self.tempscale = self.scale;
+	}
 
 	setmodel(self, "models/skullwiz.mdl");
 	self.frame = $skwalk1;
