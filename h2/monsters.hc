@@ -348,6 +348,9 @@ void ApplyLargeMonster(entity monst)
 	sizescale = random(1.25, 1.75);
 	self.scale = self.scale * sizescale;
 	
+	//save for restoring size after teleports and other efects
+	self.tempscale = self.scale;
+	
 	bonusscale = sizescale * 1.25; //bonus scale is 25% higher than size increase
 	
 	newmins = self.mins * sizescale;

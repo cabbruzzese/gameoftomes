@@ -691,6 +691,12 @@ void skullwiz_blinkin(void)
 		self.scale=max_scale;
 		self.th_pain=skullwiz_pain;
 		self.takedamage = DAMAGE_YES;
+		
+		//reset scale type to normal
+		self.drawflags (-) SCALE_TYPE_MASKOUT;
+		self.drawflags (-) SCALE_TYPE_XYONLY;
+		self.drawflags (+) SCALE_ORIGIN_BOTTOM;
+		
 		skullwiz_run();
 	}
 
@@ -700,11 +706,6 @@ void skullwiz_blinkin1 (void)
 {
 	thinktime self : HX_FRAME_TIME;
 	self.think = skullwiz_blinkin;
-	
-	if (self.bufftype & BUFFTYPE_LARGE)
-	{
-		self.tempscale = self.scale;
-	}
 
 	setmodel(self, "models/skullwiz.mdl");
 	self.frame = $skwalk1;
@@ -816,7 +817,6 @@ float loop_cnt,forward,dot;
 	self.nextthink = time;	
 	sound (self, CHAN_VOICE, "skullwiz/blinkin.wav", 1, ATTN_NORM);
 	CreateRedFlash(self.origin + '0 0 40');
-	
 }
 
 /*-----------------------------------------
@@ -869,7 +869,18 @@ void skullwiz_blink(void) [++ $sktele2..$sktele30]
 		self.aflag=FALSE;
 		self.takedamage = DAMAGE_NO;  // So t_damage won't force him into another state 
 		self.scale = 1;
-		self.drawflags = (self.drawflags & SCALE_TYPE_MASKOUT) | SCALE_TYPE_XYONLY;
+		
+		if (self.bufftype & BUFFTYPE_LARGE)
+		{
+			self.scale = self.tempscale;			
+		}
+		
+		//self.drawflags = (self.drawflags & SCALE_TYPE_MASKOUT) | SCALE_TYPE_XYONLY;
+		//replacing explicite flags with adding/removing Teleport related flags
+		self.drawflags (+) SCALE_TYPE_MASKOUT;
+		self.drawflags (+) SCALE_TYPE_XYONLY;
+		self.drawflags (-) SCALE_ORIGIN_BOTTOM;
+		
 		self.solid = SOLID_NOT;
 		self.th_pain=SUB_Null;
 		skullwiz_blinkout();	
