@@ -402,6 +402,12 @@ void door_fire()
 void door_use()
 {
 	local entity oself;
+	
+	if (self == world || self.owner == world)
+	{
+		dprint("World activated door!\n");
+		return;		
+	}
 
 	self.message = 0;			// door messages are for touch only
 	self.owner.message = 0;
@@ -435,8 +441,12 @@ void door_trigger_touch()
 	if(time < self.attack_finished)
 		return;
 	
-	if (self == world)
-		return;
+	if (self == world || self.owner == world)
+	{
+		dprint("World activated door!\n");
+		return;		
+	}
+
 
 	door = self;
 	self = self.owner;

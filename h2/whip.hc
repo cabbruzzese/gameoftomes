@@ -94,4 +94,7 @@ void whip_fire ()
 	WriteCoord (MSG_BROADCAST, trace_endpos_x);
 	WriteCoord (MSG_BROADCAST, trace_endpos_y);
 	WriteCoord (MSG_BROADCAST, trace_endpos_z);
+	
+	//play sound
+	sound(self,CHAN_WEAPON,"misc/whoosh.wav",1,ATTN_NORM);
 }
