@@ -434,6 +434,9 @@ void door_trigger_touch()
 
 	if(time < self.attack_finished)
 		return;
+	
+	if (self == world)
+		return;
 
 	door = self;
 	self = self.owner;

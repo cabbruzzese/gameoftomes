@@ -810,6 +810,15 @@ void() init_fangel =
 		precache_sound2("fangel/deflect.wav");
 		precache_sound2("fangel/hand.wav");
 		precache_sound2("fangel/wing.wav");
+		
+		if (self.classname == "monster_fallen_angel")
+		{
+			precache_sound2("fangel/ambi1.wav");
+		}
+		else
+		{
+			precache_sound2("fangel/ambi2.wav");
+		}
 	}
 
 	CreateEntityNew(self,ENT_FANGEL,"models/fangel.mdl",fangel_deathframes);
@@ -819,14 +828,12 @@ void() init_fangel =
 	self.hull = HULL_BIG;
 	if (self.classname == "monster_fallen_angel")
 	{
-		precache_sound2("fangel/ambi1.wav");
 		self.skin = 0;
 		self.health = 250;
 		self.experience_value = 250;
 	}
 	else
 	{
-		precache_sound2("fangel/ambi2.wav");
 		self.skin = 1;
 		self.health = 500;
 		self.experience_value = 500;
