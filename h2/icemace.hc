@@ -43,7 +43,7 @@ float MACE_DRAIN_COST = 1;
 
 void() IceCubeThink =
 {
-	if(self.freeze_time<time&&skill<3)
+	if(self.freeze_time<time)
 	{
 		self.th_die();
 		return;

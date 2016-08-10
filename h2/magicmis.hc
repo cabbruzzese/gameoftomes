@@ -63,6 +63,7 @@ $frame select6      select7
 float MMIS_COST = 2;
 float MMIS_TOME_COST = 8;
 float MMIS_SHOCK_COST = 4;
+float MMIS_SHOCK_ANGLE = 37;
 
 void chain_remove ()
 {
@@ -273,8 +274,8 @@ float FireShockingGrasp (float intmod, float damg)
 	shocksuccess = FALSE;
 	
 	//intmod starts at about 18 and grows to over 30 by level 7. 
-	//at 18 this is 215 and at 30 this is 275
-	radius = 125 + (5 * intmod); 
+	//at 18 this is 225 and at 30 this is 285
+	radius = 135 + (5 * intmod); 
 	
 	makevectors(self.v_angle);
 	
@@ -304,7 +305,7 @@ float FireShockingGrasp (float intmod, float damg)
 				dprint(ftos(shockangle));
 				dprint("\n");
 				
-				if (shockangle < 20)
+				if (shockangle < MMIS_SHOCK_ANGLE)
 				{
 					shocksuccess = TRUE;
 
@@ -368,7 +369,7 @@ void  mmis_power()
 	
 	wismod = self.wisdom;
 	intmod = self.intelligence;
-	damg = 20 + random(wismod);
+	damg = random(wismod * 1.5, wismod * 2.25);
 
 	tome = self.artifact_active&ART_TOMEOFPOWER;
 	if (tome)

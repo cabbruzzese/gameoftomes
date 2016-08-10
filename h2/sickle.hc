@@ -41,7 +41,7 @@ $frame 3swipe11     3swipe12     3swipe13     3swipe14
 $frame select1      select2      select3      select4      select5      
 $frame select6      select7      select8      select9      select10     
 
-float SICKLE_LIGHTNING_COST = 1;
+float SICKLE_LIGHTNING_RANGE = 450;
 float SICKLE_LIGHTNING_DIV = 14; //doubling damage too early makes this overpowered
 float SICKLE_LIGHTNING_DIV_TOME = 5;
 float SICKLE_LIGHTNING_MAX = 7;
@@ -55,13 +55,15 @@ void sickle_lightning_fire ()
 	float intmod, wismod;
 	float number_strikes;
 	float lightning_div;
-	float tome;
+	float tome, litrange;
 	
 	tome = self.artifact_active&ART_TOMEOFPOWER;
 	
 	intmod = self.intelligence;
 	wismod = self.wisdom;
-	
+
+	litrange = SICKLE_LIGHTNING_RANGE + intmod * 5;
+		
 	damg = 8 + wismod / 5; //about 10 damage per strike
 	lightning_div = SICKLE_LIGHTNING_DIV;
 	
@@ -88,7 +90,7 @@ void sickle_lightning_fire ()
 
 	makevectors (self.v_angle);
 	source = self.origin + self.proj_ofs;
-	traceline (source, source + v_forward*750, FALSE, self);
+	traceline (source, source + v_forward*litrange, FALSE, self);
 	if (trace_fraction == 1.0)
 	{
 		traceline (source, source + v_forward*64 - (v_up * 30), FALSE, self);  // 30 down
