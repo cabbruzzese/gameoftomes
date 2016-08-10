@@ -644,10 +644,7 @@ float() CheckAnyAttack =
 	//leaders can deflect attacks
 	if (self.bufftype & BUFFTYPE_LEADER)
 	{
-		if (random(5) > 1)
-		{
-			LeaderRepulse();
-		}
+		LeaderRepulse();
 	}
 	
 	if (self.model=="models/medusa.mdl"||self.model=="models/medusa2.mdl")

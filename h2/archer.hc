@@ -424,6 +424,12 @@ vector spot1, spot2;
 				chance = 0.30;
 			else if (enemy_range < RANGE_FAR)
 				chance = 0.10;
+			
+			//leaders always shoot best arrow
+			if (self.bufftype & BUFFTYPE_LEADER)
+			{
+				chance = 1.0;
+			}
 
 			if (self.classname=="monster_archer")
 			{

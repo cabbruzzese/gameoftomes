@@ -487,13 +487,16 @@ void ApplyMonsterBuff(entity monst, float canBeLeader)
 	}
 	
 	//make second check. There is a small chance that a monster can be a large leader!
-	randval = random(randmin / 2, BUFF_RANDMAX);
-	if (canBeLeader && randval > BUFF_RANDMAX - BUFF_LEADER_CHANCE)
+	if (canBeLeader)
 	{
-		ApplyLeaderMonster(monst);
-		monst.bufftype (+) BUFFTYPE_LEADER;
-		
-		return; //cannot be a spectre leader, ditch here
+		randval = random(randmin / 2, BUFF_RANDMAX);
+		if (randval > BUFF_RANDMAX - BUFF_LEADER_CHANCE)
+		{
+			ApplyLeaderMonster(monst);
+			monst.bufftype (+) BUFFTYPE_LEADER;
+			
+			return; //cannot be a spectre leader, ditch here
+		}	
 	}
 	
 	randval = random(randmin, BUFF_RANDMAX);

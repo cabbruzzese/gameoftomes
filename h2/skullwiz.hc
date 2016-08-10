@@ -416,7 +416,7 @@ void skullwiz_summoninit (void) [++ $skgate1..$skgate30]
 	{
 		spider_spawn(0);
 
-		if (random() < 0.15)   // 15% chance he'll do another
+		if (random() < 0.15 || self.bufftype & BUFFTYPE_LEADER)   // 15% chance he'll do another
 		{
 			spider_spawn(1);
 		}
@@ -504,7 +504,7 @@ void SkullMissileTouch (void)
 void SkullMissile_Twist2(void)
 {
 	vector holdangle;
-
+	
 	self.think = SkullMissile_Twist2;
 	thinktime self : .2;
 
@@ -532,7 +532,12 @@ void SkullMissile_Twist2(void)
 	{
 		sound (self, CHAN_BODY, "skullwiz/scream2.wav", 1, ATTN_NORM);
 		self.scream_time = time + random(.50,1);
-	}	
+	}
+	
+	if (self.owner.bufftype & BUFFTYPE_LEADER)
+	{
+		HomeThink();
+	}
 }
 
 void SkullMissile_Twist(void)
@@ -547,7 +552,12 @@ void SkullMissile_Twist(void)
 	{
 		sound (self, CHAN_BODY, "skullwiz/scream.wav", 1, ATTN_NORM);
 		self.scream_time = time + random(.50,1);
-	}	
+	}
+	
+	if (self.owner.bufftype & BUFFTYPE_LEADER)
+	{
+		HomeThink();
+	}
 }
 
 /*-----------------------------------------
@@ -604,6 +614,14 @@ void launch_skullshot ()
 		newmis.scale = .90;
 	}
 	
+	if (self.bufftype & BUFFTYPE_LEADER)
+	{
+		newmis.veer=0;				//slight veering, random course modifications
+		newmis.turn_time = 0.5;
+		newmis.hoverz=FALSE;
+		newmis.ideal_yaw=TRUE;
+		newmis.speed=500;
+	}
 }
 
 /*-----------------------------------------
