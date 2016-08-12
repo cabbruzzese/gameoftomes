@@ -277,11 +277,18 @@ void PlayerAdvanceLevel(float NewLevel)
 		}
 		self.max_health += HealthInc;
 
-		if (self.max_health > 900)
-			self.max_health = 900;
+		if (self.max_health > 999)
+			self.max_health = 999;
+		
+		//give int bonus to mana increase
+		ManaInc += rint(self.intelligence / 12);
 
 		//recharge mana
-		self.max_mana += ManaInc;		
+		self.max_mana += ManaInc;
+		
+		if (self.max_mana > 999)
+			self.max_mana = 999;
+		
 		self.greenmana = self.max_mana;
 		self.bluemana = self.max_mana;
 		
