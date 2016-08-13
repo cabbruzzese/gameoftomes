@@ -24,14 +24,14 @@ float cube_find_target(void)
 		
 		if (deathmatch == 1 && item.classname == "player") //target other players in deathmatch
 			targetGood = TRUE;
-		if (item.owner.classname != "player" && item.classname == "player") //target players if owned by monster
+		if (self.owner.classname != "player" && item.classname == "player") //target players if owned by monster
 			targetGood = TRUE;
-		if (item.owner.classname == "player" && item.flags & FL_MONSTER) //target monsters if owned by player
+		if (self.owner.classname == "player" && item.flags & FL_MONSTER) //target monsters if owned by player
 			targetGood = TRUE;
 		
 		if (item.health <= 0) //Don't shoot dead bodies
 			targetGood = FALSE;
-		if (item.controller.classname == self.classname) //don't shoot our own summons or anything summoned by our friends
+		if (item.controller.classname == self.controller.classname) //don't shoot our own summons or anything summoned by our friends
 			targetGood = FALSE;
 			
 		if (targetGood)

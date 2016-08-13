@@ -334,6 +334,27 @@ void() swimmonster_start =
 };
 */
 
+void ApplyMonsterBuffEffect(entity monst)
+{
+	if (monst.bufftype & BUFFTYPE_LEADER)
+		self.effects(+)EF_DIMLIGHT;
+	
+	if (monst.bufftype & BUFFTYPE_SPECTRE)
+		self.drawflags(+)DRF_TRANSLUCENT;
+	if (monst.bufftype & BUFFTYPE_GHOST)
+		self.drawflags(+)MLS_ABSLIGHT;
+}
+void RemoveMonsterBuffEffect(entity monst)
+{
+	if (monst.bufftype & BUFFTYPE_LEADER)
+		self.effects(-)EF_DIMLIGHT;
+	
+	if (monst.bufftype & BUFFTYPE_SPECTRE)
+		self.drawflags(-)DRF_TRANSLUCENT;
+	if (monst.bufftype & BUFFTYPE_GHOST)
+		self.drawflags(-)MLS_ABSLIGHT;
+}
+
 //Make monster larger and stronger
 void ApplyLargeMonster(entity monst)
 {
@@ -448,6 +469,8 @@ void ApplySpectreMonster(entity monst)
 		self.experience_value *= 1.33;
 		
 		self.drawflags(+)MLS_ABSLIGHT;
+		
+		self.bufftype(+)BUFFTYPE_GHOST;
 	}
 	
 	self = oself; //restore scope

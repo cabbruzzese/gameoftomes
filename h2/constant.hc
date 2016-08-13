@@ -236,8 +236,8 @@ float CLASS_FINAL_BOSS				= 5;
 float BUFFTYPE_NORMAL				= 0;
 float BUFFTYPE_LARGE				= 1;
 float BUFFTYPE_SPECTRE				= 2;
-float BUFFTYPE_LEADER				= 4;
-
+float BUFFTYPE_GHOST				= 4;
+float BUFFTYPE_LEADER				= 8;
 
 float MAX_HEALTH					= 200;
 

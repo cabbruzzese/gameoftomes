@@ -715,6 +715,9 @@ void skullwiz_blinkin(void)
 		self.drawflags (-) SCALE_TYPE_XYONLY;
 		self.drawflags (+) SCALE_ORIGIN_BOTTOM;
 		
+		//restore monster effects
+		ApplyMonsterBuffEffect(self);
+		
 		skullwiz_run();
 	}
 
@@ -893,11 +896,16 @@ void skullwiz_blink(void) [++ $sktele2..$sktele30]
 			self.scale = self.tempscale;			
 		}
 		
+		
+		//temporarily remove monster effects
+		// Must happen before teleport in order to not break the SCALE_TYPE_MASKOUT effect
+		RemoveMonsterBuffEffect(self);
+
 		//self.drawflags = (self.drawflags & SCALE_TYPE_MASKOUT) | SCALE_TYPE_XYONLY;
 		//replacing explicite flags with adding/removing Teleport related flags
 		self.drawflags (+) SCALE_TYPE_MASKOUT;
 		self.drawflags (+) SCALE_TYPE_XYONLY;
-		self.drawflags (-) SCALE_ORIGIN_BOTTOM;
+		self.drawflags (-) SCALE_ORIGIN_BOTTOM;		
 		
 		self.solid = SOLID_NOT;
 		self.th_pain=SUB_Null;

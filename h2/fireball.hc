@@ -33,6 +33,7 @@ void FireFizzle (void)
 void() fireballTouch =
 {
 	local float	damg;
+	float wismod;
 
 	if (other == self.owner)
 		return;		// don't explode on owner
@@ -44,7 +45,14 @@ void() fireballTouch =
 	}
 
 	if (self.dmg == -1)
-		damg = random(5,10);
+	{
+		damg = random(9,18);		
+		if (self.owner.classname == "cube_of_force" && self.owner.owner.classname == "player")
+		{
+			wismod = self.owner.owner.wisdom;
+			damg = random(wismod / 2, wismod);
+		}
+	}
 	else if (self.dmg)
 		damg = self.dmg;
 	else
