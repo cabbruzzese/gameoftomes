@@ -725,3 +725,5 @@ entity	sight_entity;	//So monsters wake up other monsters
 .float killerlevel; //used to measure player level for respawn strength
 .float bufftype; //used for monsters to determine bonus types on spawn
 .float tempscale;
+.float numjumps; //number of jumps for paladin ability
+.float jumptimeout; //timeout for paladin ability

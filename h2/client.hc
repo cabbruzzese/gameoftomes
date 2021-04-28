@@ -1132,6 +1132,8 @@ vector start, end;
 void()catapult_fire;
 void() PlayerJump =
 {
+	float jumpDelay = 0.3;
+
 	if(self.flags&FL_ONGROUND)
 	{
 		traceline(self.origin,self.origin-'0 0 3',FALSE,self);
@@ -1172,8 +1174,22 @@ void() PlayerJump =
 
 	if (!(self.flags & FL_ONGROUND))
 	{
-		return;
+		//Paladin Free Action
+		if(self.playerclass==CLASS_PALADIN&&self.flags&FL_SPECIAL_ABILITY1)
+		{
+			if (self.numjumps > 1 || self.jumptimeout > time || self.model=="models/sheep.mdl")
+			{
+				return;
+			}
+		}
+		else
+		{
+			return;
+		}
 	}
+
+	self.numjumps += 1;
+	self.jumptimeout = time + jumpDelay;
 
 	if ( !(self.flags & FL_JUMPRELEASED) )
 		return;		// don't pogo stick
@@ -1980,9 +1996,16 @@ void() PlayerPostThink =
 	}
 
 	if (!(self.flags & FL_ONGROUND))
+	{
 		self.jump_flag = self.velocity_z;
+	}
 	else
+	{
 		self.last_onground=time;
+		
+		self.jumptimeout = -1;
+		self.numjumps = 0;
+	}
 
 	CheckPowerups ();
 
