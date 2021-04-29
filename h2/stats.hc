@@ -575,3 +575,25 @@ float HasSpecialAttackInt (entity ent)
 	return FALSE;
 }
 
+//Paladin class gains special attacks while using Free Action double jump
+float IsFreeActionAttack (entity ent)
+{
+	if (!(self.playerclass==CLASS_PALADIN&&self.flags&FL_SPECIAL_ABILITY1))
+		return FALSE;
+	
+	//Paladin Free Action
+	if(!(self.flags & FL_ONGROUND) && self.numjumps == 2 && self.whiptime <= time)
+		return TRUE;
+
+	return FALSE;
+}
+
+vector NormalForwardV (vector fwd)
+{
+	vector forwardPlane;
+	forwardPlane_x = fwd_x;
+	forwardPlane_y = fwd_y;
+	forwardPlane_z = 0;
+	
+	return normalize(forwardPlane);
+}

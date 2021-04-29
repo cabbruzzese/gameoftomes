@@ -146,6 +146,115 @@ void launch_axe (vector dir_mod,vector angle_mod, float damg, float tome)
 
 }
 
+/*
+================
+FireSlamMelee
+================
+*/
+void FireSlamExplode(vector spot)
+{
+	float damg;
+	float wismod;
+
+	//FIXME: For some reason, the light casting effects in Hex2
+	//are a lot more costly than they were in Quake...
+	/*if(self.classname=="stickmine")
+	{
+		SprayFire();
+		return;
+	}*/
+	
+	wismod = self.wisdom;
+	damg = random(wismod * 4, wismod * 8);
+
+	T_RadiusDamage (self, self, damg, world);
+
+	WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
+	WriteByte (MSG_BROADCAST, TE_EXPLOSION);
+	WriteCoord (MSG_BROADCAST, spot_x);
+	WriteCoord (MSG_BROADCAST, spot_y);
+	WriteCoord (MSG_BROADCAST, spot_z);
+
+	starteffect(CE_LG_EXPLOSION, spot);
+}
+
+void FireSlamMelee (float damage_base,float damage_mod,float attack_radius)
+{
+	vector	source;
+	vector	org;
+	float damg, backstab;
+	
+	damg = random(damage_mod+damage_base,damage_base);
+
+	makevectors (self.v_angle);
+	source = self.origin+self.proj_ofs;
+	traceline (source, source + v_forward*64, FALSE, self);
+
+	if (trace_fraction == 1.0)
+	{
+		traceline (source, source + v_forward*64 - (v_up * 30), FALSE, self);  // 30 down
+		if (trace_fraction == 1.0)
+		{
+			traceline (source, source + v_forward*64 + v_up * 30, FALSE, self);  // 30 up
+			if (trace_fraction == 1.0)
+				return;
+		}
+	}
+
+	self.whiptime = -1;
+
+	org = trace_endpos + (v_forward * 4);
+
+	if (trace_ent.takedamage)
+	{
+		SpawnPuff (org, '0 0 0', damg,trace_ent);
+		T_Damage (trace_ent, self, self, damg);
+		if(!(trace_ent.flags2 & FL_ALIVE) && backstab)
+		{
+			dprint("Backstab from combat.hc");
+			centerprint(self,"Critical Hit Backstab!\n");
+			AwardExperience(self,trace_ent,10);
+		}
+	}
+	else
+	{	// hit wall
+		WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
+		WriteByte (MSG_BROADCAST, TE_GUNSHOT);
+		WriteCoord (MSG_BROADCAST, org_x);
+		WriteCoord (MSG_BROADCAST, org_y);
+		WriteCoord (MSG_BROADCAST, org_z);
+	}
+
+	if (self.greenmana > 10)
+	{
+		self.greenmana -= 10;
+		org = trace_endpos + (v_forward * -1);
+		org += '0 0 10';
+		FireSlamExplode(org);
+	}
+	else
+	{
+		if(trace_ent.thingtype==THINGTYPE_FLESH)
+			sound (self, CHAN_WEAPON, "weapons/slash.wav", 1, ATTN_NORM);
+		else
+			sound (self, CHAN_WEAPON, "weapons/hitwall.wav", 1, ATTN_NORM);
+	}
+}
+
+/*
+================
+axeblade_slam_fire
+================
+*/
+void axeblade_slam_fire (void)
+{
+	float strmod, wismod;
+	
+	strmod = self.strength;
+	wismod = self.wisdom;
+	
+	FireSlamMelee (strmod * 0.75, strmod * 2 ,64);
+}
 
 /*
 ================
@@ -219,10 +328,53 @@ void axe_deselect (void)
 		W_SetCurrentAmmo();
 }
 
+/*
+Free Action Slam Attack
+*/
+void axe_c ()
+{
+	if (self.weaponframe != $1stAxe15 || self.whiptime <= time)
+	{
+		self.wfs = advanceweaponframe($1stAxe1,$1stAxe25);
+	}
+
+	self.th_weapon = axe_c;
+
+	// These frames are used during selection animation
+	if ((self.weaponframe >= $1stAxe2) && (self.weaponframe <= $1stAxe4))
+		self.weaponframe +=1;
+	else if ((self.weaponframe >= $1stAxe6) && (self.weaponframe <= $1stAxe7))
+		self.weaponframe +=1;
+
+	if (self.weaponframe == $1stAxe14)
+	{
+		//slam attack
+		sound (self, CHAN_WEAPON, "weapons/vorpswng.wav", 1, ATTN_NORM);
+
+		self.velocity_z+=-250;
+		self.flags(-)FL_ONGROUND;
+		self.angles_x = 67.5;
+		CameraViewAngles(self,self);
+		self.whiptime = time + 0.5;
+	}
+
+	if (self.weaponframe == $1stAxe15)
+	{
+		
+		axeblade_slam_fire();
+	}
+
+	if (self.wfs == WF_LAST_FRAME)
+		axe_ready();
+	
+	self.attack_finished = time + .05;
+}
+
 void axe_b ()
 {
 	float tome;
 	
+
 	self.wfs = advanceweaponframe($1stAxe1,$1stAxe25);
 	self.th_weapon = axe_b;
 
@@ -288,7 +440,9 @@ void pal_axe_fire()
 	
 	rightclick = self.button1;
 	
-	if (rightclick)
+	if (IsFreeActionAttack(self) && rightclick)
+		axe_c();
+	else if (rightclick)
 		axe_b();
 	else
 		axe_a();

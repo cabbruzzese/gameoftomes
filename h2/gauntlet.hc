@@ -53,7 +53,9 @@ float GAUNT_PWR_ADD_DAMAGE		= 20;
 float GAUNT_PUSH				= 4;
 
 void W_SetCurrentWeapon(void);
-
+float IsFreeActionAttack(entity ent);
+void(entity voyeur, entity viewthing) CameraViewAngles;
+vector NormalForwardV (vector fwd);
 
 void gauntlet_fire (float anim)
 {
@@ -121,6 +123,8 @@ void gauntlet_fire (float anim)
 		org += '0 0 10';
 		CreateWhiteSmoke(org,'0 0 2',HX_FRAME_TIME);
 	}
+
+	self.whiptime = -1;
 }
 
 void gauntlet_ready (void)
@@ -182,8 +186,8 @@ void gauntlet_f ()
 		sound (self, CHAN_WEAPON, "weapons/gaunt1.wav", 1, ATTN_NORM);
 		
 		//leap attack
-		self.velocity+=normalize(v_forward)*300;
-		self.velocity+=normalize(v_up)*185;
+		self.velocity+=NormalForwardV(v_forward)*300;
+		self.velocity_z+=185;
 		self.flags(-)FL_ONGROUND;
 	}
 	else if (self.weaponframe == $2ndGnt9)
@@ -204,8 +208,9 @@ void gauntlet_e()
 		sound (self, CHAN_WEAPON, "weapons/gaunt1.wav", 1, ATTN_NORM);
 		
 		//uppercut attack
-		self.velocity+=normalize(v_forward)*100;
-		self.velocity+=normalize(v_up)*250;
+		
+		self.velocity+=NormalForwardV(v_forward)*100;
+		self.velocity_z+=250;
 		self.flags(-)FL_ONGROUND;
 	}
 	else if (self.weaponframe == $3rdGnt12)
@@ -274,15 +279,46 @@ void gauntlet_a ()
 		gauntlet_ready();
 }
 
+//Free Action: slam attack
+void gauntlet_freeaction_fire()
+{
+	if (self.weaponframe != $1stGnt4 || self.whiptime <= time)
+	{
+		self.wfs = advanceweaponframe($1stGnt1,$1stGnt14);
+	}
+	self.th_weapon = gauntlet_freeaction_fire;
+
+	if (self.weaponframe == $1stGnt2)
+	{
+		sound (self, CHAN_WEAPON, "weapons/gaunt1.wav", 1, ATTN_NORM);
+		
+		//slam attack
+		self.velocity_z+=-250;
+		self.flags(-)FL_ONGROUND;
+		self.angles_x = 67.5;
+		CameraViewAngles(self,self);
+		self.whiptime = time + 0.5;
+	}
+	else if (self.weaponframe == $1stGnt4)
+		gauntlet_fire(5);		
+
+	if (self.wfs == WF_LAST_FRAME)
+		gauntlet_ready();
+}
+
 void pal_gauntlet_fire(float rightclick)
 {
 	//if right clicked and on ground
-	if (rightclick)
+	if (rightclick && IsFreeActionAttack(self))
 	{
-		 if (self.flags & FL_ONGROUND)
+		gauntlet_freeaction_fire();
+	}
+	else if (rightclick)
+	{
+		if (self.flags & FL_ONGROUND)
 			gauntlet_f ();	//rush		 
-		 else
- 			gauntlet_e (); //uppercut
+		else
+			gauntlet_e (); //uppercut
 	}
 	else
 	{

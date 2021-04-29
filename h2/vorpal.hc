@@ -52,6 +52,8 @@ float VORP_TOME_EXTRACOST = 2;
 float VORP_PUSH					= 5;
 
 float HasSpecialAttackInt(entity ent);
+float IsFreeActionAttack(entity ent);
+void DrawShockEffect (entity lowner,float tag, float lflags, float duration, vector spot1, vector spot2);
 
 void missile_gone(void)
 {
@@ -594,11 +596,202 @@ void vorpal_tome_fire (float tome)
 
 /*
 ============
+Make special free action attack
+============
+*/
+float vorpal_freeaction_shock_fire (void)
+{
+	vector targetOrg, diff, forwardDiff;
+	vector beamOrg;
+	entity found;
+	float radius, shocksuccess;
+	float beamcount;
+	float damg, wismod;
+
+	wismod = self.wisdom;
+	damg = random(wismod * 1.5, wismod * 3);
+	shocksuccess = FALSE;
+	
+	radius = 180;
+	
+	makevectors(self.v_angle);
+	
+	beamcount = 0;
+	
+	beamOrg = self.origin + self.proj_ofs + (normalize(v_forward) * 40) + (normalize(v_up) * 6) + (normalize(v_right) * 12);
+
+	found=findradius(beamOrg,radius);
+	while(found)
+	{
+		if(found!=self && found.takedamage && !found.playercontrolled && found.health && beamcount < 11)
+		{
+			beamcount += 1; //Capping total beams at 10 for performance and issue with applying flags to number of beams
+			
+			targetOrg = found.origin + ('0 0 1' * (found.maxs_y));
+			
+			//make sure there are no walls in the way
+			traceline (beamOrg, targetOrg, FALSE, self);
+			if (trace_fraction != 1.0 && trace_ent == found)
+			{
+				//get angle
+				diff = found.origin - self.origin; //use origin for angles to make sure beams spawned inside monsters still hit				
+				forwardDiff = normalize(v_forward) * radius;
+
+				shocksuccess = TRUE;
+
+				//draw effect				
+				DrawShockEffect (self,beamcount,0, 7, beamOrg, targetOrg); //STREAM_TRANSLUCENT
+
+				//Damage target
+				T_Damage(found,self,self,damg);
+			}
+		}
+		found=found.chain;
+	}
+	
+	return shocksuccess;
+}
+
+void vorpal_freeaction_fire (void)
+{
+	float tome;
+	vector	source;
+	vector	org,dir;
+	float damg;
+	float no_flash,inertia;
+	float strmod, wismod;
+	
+	strmod = self.strength;
+	wismod = self.wisdom;
+
+	tome = self.artifact_active & ART_TOMEOFPOWER;
+
+	bprint (" freeaction fire...\n");
+
+	makevectors (self.v_angle);
+	source = self.origin+self.proj_ofs;
+	traceline (source, source + v_forward*64, FALSE, self);  // Straight in front
+
+	self.enemy = world;
+
+	if (trace_fraction == 1.0)	// Anything right in front ?
+	{
+		traceline (source, source + v_forward*88 - (v_up * 30), FALSE, self);  // 30 down
+	
+		if (trace_fraction == 1.0)  
+		{
+			traceline (source, source + v_forward*88 + v_up * 30, FALSE, self);  // 30 up
+		
+			if (trace_fraction == 1.0)  
+				return;
+		}
+	}
+	
+	self.whiptime = -1;
+
+	org = trace_endpos + (v_forward * 2);
+
+	if (trace_ent.takedamage) 	// It can be hurt
+	{
+		SpawnPuff (org, '0 0 0', 20,trace_ent);
+		self.enemy = trace_ent;
+
+		if(!trace_ent.mass)
+			inertia=1;
+		else if(trace_ent.mass<=5)
+			inertia=trace_ent.mass;
+		else
+			inertia=trace_ent.mass/10;
+
+		no_flash = 0;
+		if ((self.bluemana >= 4) && (tome)) // Tome of power melee damage
+		{
+			damg = 40 + random(30 + wismod);
+			damg += damg * .25;
+		}
+		else if (self.bluemana >= 2)
+		{
+			damg = 30 + random(20 + (strmod / 2));
+			if (trace_ent.flags & FL_MONSTER)  // Only monsters make it use mana
+				self.bluemana -= 2;
+		}
+		else 
+		{
+			no_flash =1;
+			damg = 20 + random(10 + (strmod / 2));
+		}
+
+		org = trace_endpos + (v_forward * -1);
+
+		if (!no_flash)
+			CreateLittleWhiteFlash(org);
+
+		dir =  trace_ent.origin - self.origin;
+		if(trace_ent.solid!=SOLID_BSP&&trace_ent.movetype!=MOVETYPE_PUSH)
+		{
+			trace_ent.velocity = dir * VORP_PUSH*(1/inertia);
+			if(trace_ent.movetype==MOVETYPE_FLY)
+			{
+				if(trace_ent.flags&FL_ONGROUND)
+					trace_ent.velocity_z=80/inertia;
+			}
+			else
+				trace_ent.velocity_z = 80/inertia;
+			trace_ent.flags (-) FL_ONGROUND;
+		}
+		T_Damage (trace_ent, self, self, damg);
+	}
+	else	// hit wall
+	{
+		org = trace_endpos + (v_forward * -1);
+		org += '0 0 10';
+		CreateWhiteSmoke(org,'0 0 2',HX_FRAME_TIME);
+	}
+
+	if (self.bluemana >= 8)
+	{
+		self.bluemana -= 8;
+		vorpal_freeaction_shock_fire();
+
+		sound(self,CHAN_AUTO,"necro/mmfire.wav",1,ATTN_NORM);
+		
+		org = trace_endpos + (v_forward * -1);
+		org += '0 0 10';
+		CreateBlueFlash(org);
+	}
+	else if (trace_ent.takedamage)
+	{
+		if (!MetalHitSound(trace_ent.thingtype))
+			sound (self, CHAN_WEAPON, "weapons/vorpht1.wav", 1, ATTN_NORM);
+	}
+	else
+	{
+		sound (self, CHAN_WEAPON, "weapons/vorpht2.wav", 1, ATTN_NORM);
+	}
+}
+
+void vorpal_freeaction_move (void)
+{
+	sound (self, CHAN_WEAPON, "weapons/vorpswng.wav", 1, ATTN_NORM);
+
+	//slam attack
+	self.velocity_z+=-250;
+	self.flags(-)FL_ONGROUND;
+	self.angles_x = 67.5;
+	CameraViewAngles(self,self);
+	self.whiptime = time + 0.5;
+}
+
+/*
+============
 Decide if vorpal sword is in Normal or Powerup mode
 ============
 */
 void vorpal_fire (float rightclick)
 {
+	if (self.whiptime > time)
+		return;
+
 	float tome;
 
 	tome = self.artifact_active & ART_TOMEOFPOWER;
@@ -660,6 +853,9 @@ void moveswipe(void) [++0 .. 6]
 
 void SpawnSwipe(void)
 {
+	if (self.whiptime > time)
+		return;
+
 	entity swipe;
 	vector org;
 
@@ -692,23 +888,32 @@ void vorpal_a ()
 	
 	rightclick = self.button1;
 	
-	self.wfs = advanceweaponframe($3rdSwd1,$3rdSwd24);
+	if (self.weaponframe != $3rdSwd13 || self.whiptime <= time)
+	{
+		self.wfs = advanceweaponframe($3rdSwd1,$3rdSwd24);
+	}
+
 	self.th_weapon = vorpal_a;
 	
 	if (self.weaponframe == $3rdSwd2)	// Frame 80
 	{
-		if (rightclick && self.bluemana >= VORP_THROW_COST && HasSpecialAttackInt(self))
+		if (IsFreeActionAttack(self) && rightclick)
+			vorpal_freeaction_move();
+		else if (rightclick && self.bluemana >= VORP_THROW_COST && HasSpecialAttackInt(self))
 			sound (self, CHAN_WEAPON, "weapons/vorppwr.wav", 1, ATTN_NORM);
 		else
 			sound (self, CHAN_WEAPON, "weapons/vorpswng.wav", 1, ATTN_NORM);
-		
 	}
-	else if (self.weaponframe == $3rdSwd9)	// Frame 84
+	else if (self.weaponframe == $3rdSwd9 && self.whiptime <= time)	// Frame 84
 	{
 		vorpal_fire (rightclick);
 		
 		//track right click
 		self.lip = 0;
+	}
+	else if (self.weaponframe == $3rdSwd13 && self.whiptime > time)
+	{
+		vorpal_freeaction_fire ();
 	}
 
 	if ((self.weaponframe == $3rdSwd9) && (self.bluemana>=2))
