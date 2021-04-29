@@ -666,8 +666,6 @@ void vorpal_freeaction_fire (void)
 
 	tome = self.artifact_active & ART_TOMEOFPOWER;
 
-	bprint (" freeaction fire...\n");
-
 	makevectors (self.v_angle);
 	source = self.origin+self.proj_ofs;
 	traceline (source, source + v_forward*64, FALSE, self);  // Straight in front
