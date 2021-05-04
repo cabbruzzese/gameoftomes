@@ -39,6 +39,8 @@ $frame power6      power7      power8      power9
 $frame select1      select2      select3      select4      select5      
 $frame select6      select7      select8      select9      select10     
 
+float IsCoopPlayer (entity ent);
+
 float MACE_DRAIN_COST = 1;
 
 void() IceCubeThink =
@@ -761,13 +763,23 @@ float FireIceMaceDrain (float intmod, float damg)
 					//draw effect				
 					DrawDrainEffect (self,beamcount + STREAM_TRANSLUCENT + STREAM_ATTACHED,0, 2, beamOrg, targetOrg);
 
-					//Damage target
-					T_Damage(found,self,self,damg);
-					
-					//heal self
-					self.health += damg / 2;
-					if (self.health > self.max_health)
-						self.health = self.max_health;
+					if (IsCoopPlayer(found))
+					{
+						//heal other
+						found.health += damg / 2;
+						if (found.health > found.max_health)
+							found.health = found.max_health;
+					}
+					else
+					{
+						//Damage target
+						T_Damage(found,self,self,damg);
+						
+						//heal self
+						self.health += damg / 2;
+						if (self.health > self.max_health)
+							self.health = self.max_health;
+					}
 				}	
 			}
 		}
@@ -814,7 +826,7 @@ void Cru_Ice_Fire (float rightclick)
 	{
 		if (rightclick)
 		{
-			icestaff_drain();			
+			icestaff_drain();
 		}
 		else
 			icestaff_shard();		

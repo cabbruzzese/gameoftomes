@@ -131,6 +131,8 @@ float CLASS_NECROMANCER				= 3;
 float CLASS_ASSASSIN				= 4;
 */
 
+float IsCoopPlayer (entity ent);
+
 // Make sure we get a real distribution beteen
 // min-max, otherwise, max will only get choosen when
 // random() returns 1.0
@@ -215,7 +217,7 @@ This routine is called (from the game C side) when a player is advanced a level
 (self.level)
 ================
 */
-float STAT_POOL_COUNT = 4;
+float STAT_POOL_COUNT = 6;
 void PlayerAdvanceLevel(float NewLevel)
 {
 	string s2;
@@ -376,46 +378,20 @@ float FindLevel(entity WhichPlayer)
 	return WhichPlayer.level;
 }
 
-
-void AwardExperience(entity ToEnt, entity FromEnt, float Amount)
+//Add XP to player and level if high enough
+void AddPlayerXP (entity ToEnt, float Amount)
 {
-	//float AfterLevel;
 	float IsPlayer;
+	float wisMod, xp, xpneeded;
 	entity SaveSelf;
-	//float index,test40,test80,diff,index2,totalnext,wis_mod;
-	float xpneeded;
-
-	if (!Amount) return;
-
-	if(ToEnt.deadflag>=DEAD_DYING)
-		return;
 
 	IsPlayer = (ToEnt.classname == "player");
-
-	if (FromEnt != world && Amount == 0.0)
-	{
-		Amount = FromEnt.experience_value;
-	}
-
-	/*
-	if (ToEnt.level <4)
-		Amount *= .5;
-
-	if (ToEnt.playerclass == CLASS_PALADIN)
-		Amount *= 1.4;
-	else if (ToEnt.playerclass == CLASS_CRUSADER)
-		Amount *= 1.35;
-	else if (ToEnt.playerclass == CLASS_NECROMANCER)
-		Amount *= 1.22;
-
-	wis_mod = ToEnt.wisdom - 11;
-	Amount+=Amount*wis_mod/20;//from .75 to 1.35
-
-	*/
-	
 	if (IsPlayer)
 	{
-		ToEnt.experience += Amount;
+		wisMod = ToEnt.wisdom * 0.1;
+		xp = Amount * wisMod;
+		
+		ToEnt.experience += xp;
 		xpneeded = GetPlayerXPNeeded(ToEnt.level);
 		
 		while (ToEnt.experience >= xpneeded)
@@ -431,6 +407,49 @@ void AwardExperience(entity ToEnt, entity FromEnt, float Amount)
 			self = SaveSelf;
 		}
 	}
+}
+
+//Give half XP to all nearby coop players
+void AwardCoopXP (entity ToEnt, float Amount)
+{
+	vector beamOrg;
+	entity found;
+	float radius, xp;
+	
+	radius = 500;
+	xp = Amount * 0.5;
+	
+	makevectors(ToEnt.v_angle);
+	
+	beamOrg = ToEnt.origin + ToEnt.proj_ofs + (normalize(v_forward) * 20);
+
+	found=findradius(beamOrg,radius);
+	while(found)
+	{
+		if (found!=ToEnt && found.takedamage && found.health && found.flags2&FL_ALIVE && IsCoopPlayer(found))
+		{
+			AddPlayerXP (found, xp);
+		}
+		found=found.chain;
+	}
+}
+
+void AwardExperience (entity ToEnt, entity FromEnt, float Amount)
+{
+	if (!Amount) return;
+
+	if(ToEnt.deadflag>=DEAD_DYING)
+		return;
+
+	if (FromEnt != world && Amount == 0.0)
+	{
+		Amount = FromEnt.experience_value;
+	}
+	
+	AddPlayerXP(ToEnt, Amount);
+	
+	if (coop)
+		AwardCoopXP(ToEnt, Amount);
 }
 
 
@@ -588,6 +607,7 @@ float IsFreeActionAttack (entity ent)
 	return FALSE;
 }
 
+//Get normalized forward vector without pitch.
 vector NormalForwardV (vector fwd)
 {
 	vector forwardPlane;
@@ -596,4 +616,16 @@ vector NormalForwardV (vector fwd)
 	forwardPlane_z = 0;
 	
 	return normalize(forwardPlane);
+}
+
+//check if entity is a coop player, i.e. friendly
+float IsCoopPlayer (entity ent)
+{
+	if (!coop)
+		return FALSE;
+	
+	if (ent.classname!="player")
+		return FALSE;
+
+	return TRUE;
 }

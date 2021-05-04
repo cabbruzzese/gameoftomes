@@ -399,9 +399,6 @@ float GetNaturalArmorClass(entity targ)
 	//All characters have natural protection
 	if (targ.classname == "player")
 	{
-		//perfect protection = 20
-		//best natural armor = 16
-		//Only best armor at 115 dex (scale starts at 15)
 		dexmod = targ.dexterity - DEX_MOD_MIN;
 		
 		if (dexmod >= DEX_MOD_MAX)
