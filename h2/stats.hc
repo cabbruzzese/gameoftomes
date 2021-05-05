@@ -217,7 +217,7 @@ This routine is called (from the game C side) when a player is advanced a level
 (self.level)
 ================
 */
-float STAT_POOL_COUNT = 6;
+float STAT_POOL_COUNT = 4;
 void PlayerAdvanceLevel(float NewLevel)
 {
 	string s2;
@@ -388,7 +388,7 @@ void AddPlayerXP (entity ToEnt, float Amount)
 	IsPlayer = (ToEnt.classname == "player");
 	if (IsPlayer)
 	{
-		wisMod = ToEnt.wisdom * 0.1;
+		wisMod = 0.8 + ToEnt.wisdom * 0.05;
 		xp = Amount * wisMod;
 		
 		ToEnt.experience += xp;

@@ -100,8 +100,8 @@ void MeteorTouch (void)
 
 void FireMeteor (string type)
 {
-vector org;
-entity meteor;
+	vector org;
+	entity meteor;
 	meteor=spawn();
 	setmodel(meteor,"models/tempmetr.mdl");
 	if(type=="minimeteor")
@@ -159,6 +159,106 @@ entity meteor;
 
 	meteor.solid=SOLID_BBOX;
 	meteor.touch=MeteorTouch;
+
+	meteor.think=MeteorThink;
+	thinktime meteor : 0.1;
+
+	setorigin(meteor,org);
+}
+
+void MeteorSmallTouch (void)
+{
+	sound(self.controller,CHAN_BODY,"misc/rubble.wav",1,ATTN_NORM);
+	self.pain_finished=TRUE;
+
+	if(other.takedamage&&other.health)
+	{
+		T_Damage(other,self,self.owner,self.dmg);
+
+		if((other.flags&FL_CLIENT||other.flags&FL_MONSTER)&&other.mass<200)
+		{
+		vector hitdir;
+			hitdir=self.o_angle*50;
+			hitdir_z+=25;
+			if(hitdir_z<0)
+				hitdir_z=0;
+			other.velocity=hitdir;
+			other.flags(-)FL_ONGROUND;
+		}
+		self.dmg/=2;
+	}
+	
+	
+	if (self.owner.artifact_active&ART_TOMEOFPOWER)
+	{
+		self.dmg=10+self.owner.wisdom;
+	}
+	else
+	{
+		self.dmg=5;
+		self.flags2(+)FL_SMALL;
+	}
+
+	MultiExplode();
+}
+
+void FireSmallMeteor (float tome)
+{
+	vector org, rright, rup;
+	entity meteor;
+	float random1, random2, rscale;
+	meteor=spawn();
+
+	setmodel(meteor,"models/tempmetr.mdl");
+	meteor.classname="minimeteor";
+	meteor.th_die=MeteoriteFizzle;
+	meteor.lifetime=time + 1.5;
+	rscale = random(0.25, 0.5);
+	meteor.scale=rscale;
+
+	if(self.classname=="player")
+	{
+		if (self.greenmana < 1)
+			return;
+
+		self.greenmana-=1;
+	}
+	meteor.classname="minimeteor";
+	self.punchangle_x = -1;
+	//sound(self,CHAN_AUTO,"crusader/metfire.wav",1,ATTN_NORM);
+	sound(self,CHAN_AUTO,"mummy/mislfire.wav",1,ATTN_NORM);
+
+	self.effects(+)EF_MUZZLEFLASH;
+	makevectors(self.v_angle);
+	meteor.speed=1000;
+	meteor.o_angle=normalize(v_forward);		
+	meteor.velocity=meteor.o_angle*meteor.speed;
+	meteor.veer=30;
+	meteor.lifetime=time + 5;
+	meteor.dmg=8 + (self.wisdom / 2) * rscale;
+	meteor.movetype=MOVETYPE_FLYMISSILE;
+	
+	org=self.origin+self.proj_ofs+v_forward*12;
+
+	//randomize spawn
+	random1 = random(-10, 10);
+	random2 = random(-20, 0);
+	rright = normalize(v_right) * random1;
+	rup = normalize(v_up) * random2;
+	org = org + rright + rup;
+
+	setsize(meteor,'0 0 0', '0 0 0');
+
+	meteor.abslight = 1.0;
+	meteor.drawflags (+) (MLS_FIREFLICKER | MLS_ABSLIGHT);
+
+	meteor.avelocity=RandomVector('360 360 360');
+
+	meteor.owner=self;
+	meteor.controller=self;
+
+	meteor.solid=SOLID_BBOX;
+	meteor.touch=MeteorSmallTouch;
 
 	meteor.think=MeteorThink;
 	thinktime meteor : 0.1;
@@ -657,13 +757,65 @@ void meteor_fire (void)
 		meteor_ready_loop();
 	}
 	else if(self.weaponframe==$fire1 &&self.attack_finished<=time)
-			FireMeteor("meteor");
+		FireMeteor("meteor");
+}
+
+void meteor_small_fire (void)
+{
+	float tome;
+	float rightclick;
+
+	if(self.greenmana < 1)
+		meteor_ready_loop();
+	
+	rightclick = self.button1;
+	tome = self.artifact_active&ART_TOMEOFPOWER;
+
+	if (self.weaponframe!=$fire1 || !rightclick)
+	{
+		self.wfs = advanceweaponframe($fire1,$fire9);
+		self.numshots = 0;
+	}
+
+	self.th_weapon=meteor_small_fire;
+
+	if(self.weaponframe==$fire1 && self.attack_finished<=time)
+	{
+		if (rightclick)
+		{
+			FireSmallMeteor(tome);
+			if (self.numshots < 2)
+				self.attack_finished=time + 0.5;
+			else if (self.numshots < 3)
+				self.attack_finished=time + 0.3;
+			else
+				self.attack_finished=time + 0.2;
+
+			//fire 2 at high numbers
+			if (self.numshots > 7 && self.greenmana > 0)
+				FireSmallMeteor(tome);
+
+			//fire 3 at sustained rate of fire
+			if (self.numshots > 14 && self.greenmana > 0)
+				FireSmallMeteor(tome);
+
+			self.numshots += 1;
+		}
+		else
+			meteor_ready_loop();
+	}
 }
 
 void() Cru_Met_Attack =
 {
+	float rightclick;
+	
+	rightclick = self.button1;
+
 	if(self.artifact_active&ART_TOMEOFPOWER)
 		self.th_weapon=meteor_power_fire;
+	else if (rightclick || self.greenmana < 8)
+		self.th_weapon=meteor_small_fire;
 	else
 		self.th_weapon=meteor_fire;
 	thinktime self : 0;

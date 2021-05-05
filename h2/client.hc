@@ -671,6 +671,7 @@ entity spot;
 	self.whiptime = 0;
 	self.numjumps = 0;
 	self.jumptimeout = 0;
+	self.numshots = 0;
 	
 	if(self.newclass)
 	{
@@ -885,6 +886,7 @@ entity spot;
 	self.whiptime = 0;
 	self.numjumps = 0;
 	self.jumptimeout = 0;
+	self.numshots = 0;
 
 	self.light_level = 128;		// So the assassin doesn't go invisible coming out of the teleporter
 

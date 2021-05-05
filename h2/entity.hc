@@ -727,3 +727,4 @@ entity	sight_entity;	//So monsters wake up other monsters
 .float tempscale;
 .float numjumps; //number of jumps for paladin ability
 .float jumptimeout; //timeout for paladin ability
+.float numshots;
