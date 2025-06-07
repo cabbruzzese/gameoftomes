@@ -25,6 +25,5 @@
             "script": "./scripts/run.ps1",
             "cwd": "${cwd}"
         }
-
     ]
 }
