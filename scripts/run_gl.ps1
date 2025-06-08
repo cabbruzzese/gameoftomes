@@ -1,3 +1,3 @@
 cd gamefiles
 echo "Starting mod"
-.\glh2.exe -game
+.\glh2.exe -game got
