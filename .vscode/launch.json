@@ -5,6 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Build And Run GL (powershell)",
+            "type": "PowerShell",
+            "request": "launch",
+            "script": "./scripts/build_run_gl.ps1",
+            "cwd": "${cwd}"
+        },
+        {
             "name": "Build And Run (powershell)",
             "type": "PowerShell",
             "request": "launch",
@@ -23,6 +30,13 @@
             "type": "PowerShell",
             "request": "launch",
             "script": "./scripts/run.ps1",
+            "cwd": "${cwd}"
+        },
+        {
+            "name": "Run GL(powershell)",
+            "type": "PowerShell",
+            "request": "launch",
+            "script": "./scripts/run_gl.ps1",
             "cwd": "${cwd}"
         }
     ]
