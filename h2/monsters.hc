@@ -484,9 +484,18 @@ float BUFF_LEADER_CHANCE = 3;
 float BUFF_SPECTRE_CHANCE = 6;
 void ApplyMonsterBuff(entity monst, float canBeLeader)
 {	
-	float randmin, randval;
+	float randmin, randval, modflags;
 	
+	modflags = cvar("temp1");
+
 	monst.bufftype = BUFFTYPE_NORMAL;
+
+	// Ignore buffs if server has them off
+	if (modflags & GOT_NOLEADERS)
+	{
+		dprint("Leader Types off\n");
+		return;
+	}
 	
 	//no buff for player summoned monsters
 	if (monst.playercontrolled)

@@ -607,3 +607,7 @@ float ACT_CROUCH_STAND	= 6;
 float ACT_CROUCH_MOVE	= 7;
 float ACT_DEAD			= 8;
 float ACT_DECAP			= 9;
+
+// GOT mod flags
+float GOT_NORESPAWN = 1;
+float GOT_NOLEADERS = 2;

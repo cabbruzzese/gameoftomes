@@ -286,4 +286,3 @@ void(entity ent) CopyToBodyQue =
 	setsize (bodyque_head, ent.mins, ent.maxs);
 	bodyque_head = bodyque_head.owner;
 };*/
-

@@ -4,7 +4,7 @@
 Find out more at [Game of Tomes Wiki](https://github.com/cabbruzzese/gameoftomes/wiki)
 
 ## Download
-Download [latest version 1.5.](https://github.com/cabbruzzese/gameoftomes/releases/tag/version1_5)
+Download [latest version 1.6.](https://github.com/cabbruzzese/gameoftomes/releases/tag/version1_6)
 
 ## Development
 

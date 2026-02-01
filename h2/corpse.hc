@@ -170,9 +170,29 @@ float WANDERING_MONSTER_TIME_MAX = 666; //11 minutes
 void MarkForRespawn (void)
 {
 	entity newmis;
-	float timelimit;
+	float timelimit, modflags, canrespawn;
+
+	modflags = cvar("temp1");
+
+	dprint ("Temp1 flags: ");
+	dprint (ftos(modflags));
+	dprint ("\n");
+
+	// do not respawn players, or summoned monsters, or anything if respawn flag is off
+	canrespawn = 1;
+	if (self.classname == "player")
+		canrespawn = 0;
 	
-	if (self.classname != "player" && !self.preventrespawn) //do not respawn players or summoned monsters
+	if (self.preventrespawn)
+		canrespawn = 0;
+
+	if (modflags & GOT_NORESPAWN)
+	{
+		dprint ("Respawn monsters off\n");
+		canrespawn = 0;
+	}
+
+	if (canrespawn)
 	{
 		dprint ("Classname: ");
 		dprint (self.classname);
@@ -181,7 +201,6 @@ void MarkForRespawn (void)
 		dprint (" Owner: ");
 		dprint (self.owner.classname);
 		dprint ("\n");
-		dprintv("Marked for respawn: %s\n",self.origin);
 
 		timelimit = random(WANDERING_MONSTER_TIME_MIN, WANDERING_MONSTER_TIME_MAX);
 		
